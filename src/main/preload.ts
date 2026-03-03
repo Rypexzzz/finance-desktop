@@ -24,6 +24,7 @@ const api: ElectronApi = {
     create: (payload) => ipcRenderer.invoke("debts:create", payload),
     update: (id, payload) => ipcRenderer.invoke("debts:update", { id, payload }),
     changeStatus: (id, status) => ipcRenderer.invoke("debts:changeStatus", { id, status }),
+    delete: (id) => ipcRenderer.invoke("debts:delete", { id }),
     payments: (debtId) => ipcRenderer.invoke("debts:payments", { debtId }),
     addPayment: (debtId, payload) => ipcRenderer.invoke("debts:addPayment", { debtId, payload })
   },

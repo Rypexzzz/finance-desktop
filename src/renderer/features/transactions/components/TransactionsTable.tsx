@@ -52,7 +52,7 @@ export function TransactionsTable({ items, total, onEdit, onDelete }: Props) {
                         ? "Доход"
                         : item.type === "expense"
                         ? "Расход"
-                        : "Служебн."}
+                        : "Служ."}
                     </span>
                   </td>
 

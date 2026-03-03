@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { AddDebtPaymentInput, CreateDebtInput, DebtStatus, UpdateDebtInput } from "../../../shared/types/debt";
-import { addDebtPayment, changeDebtStatus, createDebt, listDebtPayments, listDebts, updateDebt } from "./api";
+import { addDebtPayment, changeDebtStatus, createDebt, deleteDebt, listDebtPayments, listDebts, updateDebt } from "./api";
 
 export function useDebts(params?: { year?: number; month?: number }) {
   return useQuery({ queryKey: ["debts", params], queryFn: () => listDebts(params?.year, params?.month) });
@@ -39,6 +39,17 @@ export function useAddDebtPayment() {
       qc.invalidateQueries({ queryKey: ["debts"] });
       qc.invalidateQueries({ queryKey: ["transactions"] });
       qc.invalidateQueries({ queryKey: ["debt-payments", vars.debtId] });
+    }
+  });
+}
+
+export function useDeleteDebt() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: deleteDebt,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["debts"] });
+      queryClient.invalidateQueries({ queryKey: ["transactions"] });
     }
   });
 }

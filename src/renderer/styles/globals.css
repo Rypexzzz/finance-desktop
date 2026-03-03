@@ -2,12 +2,20 @@
   --bg: #0b1220;
   --surface: #111827;
   --surface-2: #1f2937;
+  --surface-elevated: #0f172a;
   --border: #2d3748;
   --text: #f3f4f6;
   --muted: #9ca3af;
   --primary: #3b82f6;
-  --danger: #ef4444;
-  --success: #22c55e;
+  --primary-soft: rgba(59, 130, 246, 0.14);
+  --hover: rgba(255, 255, 255, 0.04);
+  --success-soft: rgba(34, 197, 94, 0.12);
+  --danger-soft: rgba(239, 68, 68, 0.12);
+  --info-soft: rgba(59, 130, 246, 0.12);
+  --income-text: #86efac;
+  --expense-text: #fca5a5;
+  --service-text: #93c5fd;
+  --overlay: rgba(2, 6, 23, 0.65);
   --shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
 }
 
@@ -44,7 +52,7 @@ a {
 
 .sidebar {
   border-right: 1px solid var(--border);
-  background: #0f172a;
+  background: var(--surface-elevated);
   padding: 16px;
 }
 
@@ -69,13 +77,13 @@ a {
 }
 
 .nav-item:hover {
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--hover);
   color: var(--text);
 }
 
 .nav-item.active {
-  background: rgba(59, 130, 246, 0.14);
-  color: #bfdbfe;
+  background: var(--primary-soft);
+  color: var(--service-text);
 }
 
 .main-layout {
@@ -90,7 +98,7 @@ a {
   justify-content: space-between;
   padding: 0 20px;
   border-bottom: 1px solid var(--border);
-  background: rgba(17, 24, 39, 0.85);
+  background: color-mix(in srgb, var(--surface) 85%, transparent);
   backdrop-filter: blur(8px);
 }
 
@@ -147,7 +155,7 @@ a {
 
 .alert.error {
   color: #fecaca;
-  background: rgba(239, 68, 68, 0.12);
+  background: var(--danger-soft);
   border-color: rgba(239, 68, 68, 0.25);
 }
 
@@ -200,7 +208,7 @@ label {
 input, select {
   width: 100%;
   border: 1px solid var(--border);
-  background: #0f172a;
+  background: var(--surface-elevated);
   color: var(--text);
   border-radius: 10px;
   padding: 10px 12px;
@@ -224,7 +232,7 @@ input, select {
 .table {
   width: 100%;
   border-collapse: collapse;
-  min-width: 880px;
+  min-width: 760px;
 }
 
 .table th, .table td {
@@ -251,6 +259,7 @@ input, select {
 
 .badge {
   display: inline-flex;
+  white-space: nowrap;
   align-items: center;
   border-radius: 999px;
   padding: 4px 8px;
@@ -259,20 +268,20 @@ input, select {
 }
 
 .badge.income {
-  background: rgba(34, 197, 94, 0.12);
-  color: #86efac;
+  background: var(--success-soft);
+  color: var(--income-text);
   border-color: rgba(34, 197, 94, 0.2);
 }
 
 .badge.expense {
-  background: rgba(239, 68, 68, 0.12);
-  color: #fca5a5;
+  background: var(--danger-soft);
+  color: var(--expense-text);
   border-color: rgba(239, 68, 68, 0.2);
 }
 
 .badge.service {
-  background: rgba(59, 130, 246, 0.12);
-  color: #93c5fd;
+  background: var(--info-soft);
+  color: var(--service-text);
   border-color: rgba(59, 130, 246, 0.2);
 }
 
@@ -290,20 +299,20 @@ input, select {
 }
 
 .amount.income {
-  color: #86efac;
+  color: var(--income-text);
   font-weight: 700;
 }
 
 .amount.expense,
 .amount.service {
-  color: #fca5a5;
+  color: var(--expense-text);
   font-weight: 700;
 }
 
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(2, 6, 23, 0.65);
+  background: var(--overlay);
   display: grid;
   place-items: center;
   padding: 20px;
@@ -335,7 +344,7 @@ input, select {
 }
 
 .field-error {
-  color: #fca5a5;
+  color: var(--expense-text);
   font-size: 12px;
 }
 
@@ -390,13 +399,13 @@ input, select {
 }
 
 .btn.expense-btn {
-  background: rgba(239, 68, 68, 0.12);
+  background: var(--danger-soft);
   border-color: rgba(239, 68, 68, 0.35);
   color: #fecaca;
 }
 
 .btn.income-btn {
-  background: rgba(34, 197, 94, 0.12);
+  background: var(--success-soft);
   border-color: rgba(34, 197, 94, 0.35);
   color: #bbf7d0;
 }
@@ -434,7 +443,7 @@ input, select {
   padding: 4px;
   border: 1px solid var(--border);
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.02);
+  background: color-mix(in srgb, var(--surface-2) 35%, transparent);
   margin-bottom: 12px;
   flex-wrap: wrap;
 }
@@ -451,13 +460,13 @@ input, select {
 
 .segment-btn:hover {
   color: var(--text);
-  background: rgba(255, 255, 255, 0.03);
+  background: color-mix(in srgb, var(--surface-2) 50%, transparent);
 }
 
 .segment-btn.active {
   color: var(--text);
   border-color: var(--border);
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--hover);
 }
 
 .segment-btn.active.expense {
@@ -473,7 +482,7 @@ input, select {
 }
 
 .segment-btn.active.service {
-  color: #bfdbfe;
+  color: var(--service-text);
   border-color: rgba(59, 130, 246, 0.25);
   background: rgba(59, 130, 246, 0.08);
 }
@@ -517,11 +526,11 @@ input, select {
 }
 
 .income-text {
-  color: #86efac;
+  color: var(--income-text);
 }
 
 .expense-text {
-  color: #fca5a5;
+  color: var(--expense-text);
 }
 
 .table tbody tr {
@@ -529,7 +538,7 @@ input, select {
 }
 
 .table tbody tr:hover {
-  background: rgba(255, 255, 255, 0.02);
+  background: color-mix(in srgb, var(--surface-2) 35%, transparent);
 }
 
 .comment-cell {
@@ -630,7 +639,7 @@ input, select {
 
 /* Чтобы вложенная карточка фильтров не выглядела как "карточка в карточке" слишком жирно */
 .filters-collapsible-body > .filters-card {
-  background: rgba(255, 255, 255, 0.02);
+  background: color-mix(in srgb, var(--surface-2) 35%, transparent);
   box-shadow: none;
   border-style: dashed;
 }
@@ -665,7 +674,7 @@ input, select {
   gap: 8px;
   border: 1px solid var(--border);
   border-radius: 999px;
-  background: rgba(59, 130, 246, 0.14);
+  background: var(--primary-soft);
   color: var(--text);
   font-weight: 600;
   padding: 8px 14px;
@@ -676,7 +685,7 @@ input, select {
 .filters-toggle-btn:hover {
   transform: translateY(-1px);
   border-color: rgba(96, 165, 250, 0.75);
-  background: rgba(59, 130, 246, 0.22);
+  background: color-mix(in srgb, var(--primary) 24%, transparent);
 }
 
 .filters-toggle-btn-icon {
@@ -814,13 +823,23 @@ input, select {
 }
 
 :root[data-theme="light"] {
-  --bg: #f3f6fb;
+  --bg: #f4f7fb;
   --surface: #ffffff;
-  --surface-2: #eef2f7;
+  --surface-2: #eef3f9;
+  --surface-elevated: #e9eff8;
   --border: #d4dce8;
-  --text: #111827;
-  --muted: #6b7280;
+  --text: #0f172a;
+  --muted: #5b6577;
   --primary: #2563eb;
+  --primary-soft: rgba(37, 99, 235, 0.12);
+  --hover: rgba(15, 23, 42, 0.06);
+  --success-soft: rgba(22, 163, 74, 0.12);
+  --danger-soft: rgba(220, 38, 38, 0.12);
+  --info-soft: rgba(37, 99, 235, 0.12);
+  --income-text: #15803d;
+  --expense-text: #b91c1c;
+  --service-text: #1d4ed8;
+  --overlay: rgba(15, 23, 42, 0.38);
   --shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
 }
 
@@ -848,7 +867,7 @@ input, select {
   margin: 10px 0;
   height: 10px;
   border-radius: 999px;
-  background: rgba(148, 163, 184, 0.25);
+  background: color-mix(in srgb, var(--border) 75%, transparent);
   overflow: hidden;
 }
 

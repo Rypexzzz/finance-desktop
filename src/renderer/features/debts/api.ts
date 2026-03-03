@@ -36,3 +36,9 @@ export async function addDebtPayment(debtId: number, payload: AddDebtPaymentInpu
   if (!res.ok) throw new Error(res.error.message);
   return res.data;
 }
+
+export async function deleteDebt(id: number) {
+  const res = await electronApi.debts.delete(id);
+  if (!res.ok) throw new Error(res.error.message);
+  return res.data;
+}

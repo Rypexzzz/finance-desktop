@@ -1,7 +1,6 @@
 import { HashRouter, Navigate, Route, Routes } from "react-router-dom";
 import { AppShell } from "./layout/AppShell";
 import { TransactionsPage } from "../pages/TransactionsPage";
-import { DashboardPage } from "../pages/DashboardPage";
 import { AnalyticsPage } from "../pages/AnalyticsPage";
 import { GoalsPage } from "../pages/GoalsPage";
 import { DebtsPage } from "../pages/DebtsPage";
@@ -12,9 +11,9 @@ export function AppRouter() {
     <HashRouter>
       <AppShell>
         <Routes>
-          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          <Route path="/" element={<Navigate to="/analytics" replace />} />
           <Route path="/transactions" element={<TransactionsPage />} />
-          <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/dashboard" element={<Navigate to="/analytics" replace />} />
           <Route path="/analytics" element={<AnalyticsPage />} />
           <Route path="/goals" element={<GoalsPage />} />
           <Route path="/debts" element={<DebtsPage />} />

@@ -6,7 +6,7 @@ export function getSettingsService() {
 }
 
 export function setThemeService(theme: AppTheme) {
-  if (!["light", "dark", "system"].includes(theme)) {
+  if (!["light", "dark"].includes(theme)) {
     throw new Error("Некорректная тема");
   }
   return { theme: setTheme(theme) };

@@ -6,6 +6,11 @@ import {
   updateTransaction
 } from "../db/queries/transactions.repo";
 import { getCategoryById } from "../db/queries/categories.repo";
+import {
+  deleteDebtPaymentByTransactionId,
+  getDebtPaymentByTransactionId,
+  recalculateDebtAfterPaymentChange
+} from "../db/queries/debts.repo";
 import type {
   CreateTransactionInput,
   TransactionListFilters,
@@ -113,6 +118,12 @@ export function updateTransactionService(id: number, payload: UpdateTransactionI
 export function deleteTransactionService(id: number) {
   if (!Number.isInteger(id) || id <= 0) {
     throw new Error("Некорректный ID операции");
+  }
+
+  const debtPayment = getDebtPaymentByTransactionId(id);
+  if (debtPayment) {
+    deleteDebtPaymentByTransactionId(id);
+    recalculateDebtAfterPaymentChange(debtPayment.debtId);
   }
 
   const deleted = deleteTransaction(id);
