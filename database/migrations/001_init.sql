@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS app_settings (
   id INTEGER PRIMARY KEY,
-  theme TEXT NOT NULL DEFAULT 'system',
+  theme TEXT NOT NULL DEFAULT 'dark',
   currency TEXT NOT NULL DEFAULT 'RUB',
   locale TEXT NOT NULL DEFAULT 'ru-RU',
   created_at TEXT NOT NULL,

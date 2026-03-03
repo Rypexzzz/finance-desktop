@@ -101,6 +101,70 @@ export function listDebtPayments(debtId: number): DebtPayment[] {
   }));
 }
 
+
+export function getDebtPaymentByTransactionId(transactionId: number): DebtPayment | null {
+  const db = getDb();
+  const row = db.prepare("SELECT * FROM debt_payments WHERE transaction_id = ?").get(transactionId) as any;
+  if (!row) return null;
+  return {
+    id: row.id,
+    debtId: row.debt_id,
+    transactionId: row.transaction_id,
+    amountRub: row.amount_rub,
+    date: row.date,
+    balanceBeforeRub: row.balance_before_rub,
+    balanceAfterRub: row.balance_after_rub,
+    comment: row.comment ?? "",
+    createdAt: row.created_at
+  };
+}
+
+export function deleteDebtPaymentByTransactionId(transactionId: number): boolean {
+  const db = getDb();
+  const res = db.prepare("DELETE FROM debt_payments WHERE transaction_id = ?").run(transactionId);
+  return res.changes > 0;
+}
+
+export function recalculateDebtAfterPaymentChange(debtId: number): void {
+  const db = getDb();
+  const debt = db.prepare("SELECT initial_amount_rub, status FROM debts WHERE id = ?").get(debtId) as any;
+  if (!debt) return;
+  const paid = db.prepare("SELECT COALESCE(SUM(amount_rub), 0) as paid FROM debt_payments WHERE debt_id = ?").get(debtId) as { paid: number };
+  const balanceAfter = Math.max(0, debt.initial_amount_rub - (paid?.paid ?? 0));
+
+  db.prepare(`
+    UPDATE debts
+    SET
+      current_balance_rub = ?,
+      status = CASE
+        WHEN status IN ('paused', 'cancelled') THEN status
+        WHEN ? = 0 THEN 'closed'
+        ELSE 'active'
+      END,
+      updated_at = ?
+    WHERE id = ?
+  `).run(balanceAfter, balanceAfter, new Date().toISOString(), debtId);
+}
+
+export function deleteDebt(id: number): boolean {
+  const db = getDb();
+
+  const paymentRows = db.prepare("SELECT transaction_id FROM debt_payments WHERE debt_id = ?").all(id) as Array<{ transaction_id: number }>;
+
+  const run = db.transaction(() => {
+    const debtRes = db.prepare("DELETE FROM debts WHERE id = ?").run(id);
+    if (debtRes.changes === 0) return false;
+
+    for (const row of paymentRows) {
+      db.prepare("DELETE FROM transactions WHERE id = ?").run(row.transaction_id);
+    }
+
+    return true;
+  });
+
+  return run();
+}
+
 export function addDebtPayment(debtId: number, transactionId: number, payload: AddDebtPaymentInput, balanceBefore: number, balanceAfter: number): number {
   const db = getDb();
   const result = db.prepare(`

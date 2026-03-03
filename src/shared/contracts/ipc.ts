@@ -52,6 +52,7 @@ export interface ElectronApi {
     create(payload: CreateDebtInput): Promise<ApiResult<{ id: number }>>;
     update(id: number, payload: UpdateDebtInput): Promise<ApiResult<{ id: number }>>;
     changeStatus(id: number, status: DebtStatus): Promise<ApiResult<{ id: number }>>;
+    delete(id: number): Promise<ApiResult<{ id: number }>>;
     payments(debtId: number): Promise<ApiResult<DebtPayment[]>>;
     addPayment(debtId: number, payload: AddDebtPaymentInput): Promise<ApiResult<{ id: number }>>;
   };

@@ -6,11 +6,19 @@ import {
   useCreateDebt,
   useDebtPayments,
   useDebts,
+  useDeleteDebt,
   useUpdateDebt
 } from "../features/debts/hooks";
 import type { DebtStatus, DebtType } from "../../shared/types/debt";
 
 const TODAY = new Date().toISOString().slice(0, 10);
+
+const DEBT_STATUS_LABELS: Record<DebtStatus, string> = {
+  active: "Активный",
+  paused: "На паузе",
+  closed: "Закрыт",
+  cancelled: "Отменён"
+};
 
 export function DebtsPage() {
   const now = new Date();
@@ -39,6 +47,7 @@ export function DebtsPage() {
   const updateDebt = useUpdateDebt();
   const changeStatus = useChangeDebtStatus();
   const addPayment = useAddDebtPayment();
+  const deleteDebt = useDeleteDebt();
 
   const selectedDebt = (debtsQuery.data ?? []).find((item) => item.id === selectedDebtId);
 
@@ -87,6 +96,13 @@ export function DebtsPage() {
     await changeStatus.mutateAsync({ id: debtId, status });
   }
 
+  async function onDeleteDebt(debtId: number) {
+    await deleteDebt.mutateAsync(debtId);
+    if (selectedDebtId === debtId) {
+      setSelectedDebtId(undefined);
+    }
+  }
+
   return (
     <div className="page-stack">
       <div><h1>Долги</h1><p className="muted">Кредиты и кредитные карты с историей погашений и служебными транзакциями.</p></div>
@@ -121,12 +137,12 @@ export function DebtsPage() {
               <div className="goal-title-row">
                 <strong>{debt.name}</strong>
                 <select value={debt.status} onChange={(e) => onChangeStatus(debt.id, e.target.value as DebtStatus)}>
-                  <option value="active">active</option><option value="paused">paused</option><option value="closed">closed</option><option value="cancelled">cancelled</option>
+                  <option value="active">{DEBT_STATUS_LABELS.active}</option><option value="paused">{DEBT_STATUS_LABELS.paused}</option><option value="closed">{DEBT_STATUS_LABELS.closed}</option><option value="cancelled">{DEBT_STATUS_LABELS.cancelled}</option>
                 </select>
               </div>
               <p className="muted">Остаток {formatRub(debt.currentBalanceRub)} из {formatRub(debt.initialAmountRub)}</p>
               <div className="progress-bar"><div className="progress-fill" style={{ width: `${totalPercent}%` }} /></div>
-              <div className="goal-title-row"><span>Общий прогресс: {totalPercent}%</span><button className="btn" onClick={() => { setSelectedDebtId(debt.id); setEditName(debt.name); setEditPlan(debt.monthlyPlanRub ?? 0); }}>Выбрать</button></div>
+              <div className="goal-title-row"><span>Общий прогресс: {totalPercent}%</span><div className="row-actions"><button className="btn" onClick={() => { setSelectedDebtId(debt.id); setEditName(debt.name); setEditPlan(debt.monthlyPlanRub ?? 0); }}>Выбрать</button><button className="btn ghost danger" onClick={() => onDeleteDebt(debt.id)}>Удалить долг</button></div></div>
               <div className="muted">За месяц: {debt.monthlyPlanRub ? `${monthPercent}% от плана` : formatRub(debt.paidMonthRub)}</div>
             </div>
           );

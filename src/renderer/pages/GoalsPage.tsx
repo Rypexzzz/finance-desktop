@@ -12,6 +12,13 @@ import type { GoalStatus } from "../../shared/types/goal";
 
 const TODAY = new Date().toISOString().slice(0, 10);
 
+const GOAL_STATUS_LABELS: Record<GoalStatus, string> = {
+  active: "Активная",
+  paused: "На паузе",
+  completed: "Выполнена",
+  cancelled: "Отменена"
+};
+
 export function GoalsPage() {
   const now = new Date();
   const [year, setYear] = useState(now.getFullYear());
@@ -121,7 +128,7 @@ export function GoalsPage() {
               <div className="goal-title-row">
                 <strong>{goal.name}</strong>
                 <select value={goal.status} onChange={(e) => onChangeStatus(goal.id, e.target.value as GoalStatus)}>
-                  <option value="active">active</option><option value="paused">paused</option><option value="completed">completed</option><option value="cancelled">cancelled</option>
+                  <option value="active">{GOAL_STATUS_LABELS.active}</option><option value="paused">{GOAL_STATUS_LABELS.paused}</option><option value="completed">{GOAL_STATUS_LABELS.completed}</option><option value="cancelled">{GOAL_STATUS_LABELS.cancelled}</option>
                 </select>
               </div>
               <p className="muted">{formatRub(goal.currentAmountRub)} из {formatRub(goal.targetAmountRub)} {goal.deadlineDate ? `• до ${formatDateRu(goal.deadlineDate)}` : ""}</p>

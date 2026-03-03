@@ -3,7 +3,6 @@ import type { PropsWithChildren } from "react";
 import { useState } from "react";
 
 const navItems = [
-  { to: "/dashboard", label: "Дашборд" },
   { to: "/transactions", label: "Операции" },
   { to: "/analytics", label: "Аналитика" },
   { to: "/goals", label: "Цели" },
@@ -18,7 +17,6 @@ export function AppShell({ children }: PropsWithChildren) {
   return (
     <div className={`app-shell ${collapsed ? "collapsed" : ""}`}>
       <aside className="sidebar">
-        <div className="brand">💰 Finance Desktop</div>
         <button className="btn ghost" onClick={() => setCollapsed((prev) => !prev)}>
           {collapsed ? "→" : "←"}
         </button>
@@ -41,7 +39,6 @@ export function AppShell({ children }: PropsWithChildren) {
           <div className="topbar-title">
             {navItems.find((i) => i.to === location.pathname)?.label ?? "Приложение"}
           </div>
-          <div className="topbar-subtitle">Локально • SQLite • Офлайн</div>
         </header>
 
         <main className="content">{children}</main>

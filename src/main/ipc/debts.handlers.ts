@@ -4,6 +4,7 @@ import {
   addDebtPaymentService,
   changeDebtStatusService,
   createDebtService,
+  deleteDebtService,
   listDebtPaymentsService,
   listDebtsService,
   updateDebtService
@@ -32,6 +33,16 @@ export function registerDebtsHandlers() {
   ipcMain.handle("debts:update", async (_event, args: { id: number; payload: UpdateDebtInput }) => {
     try {
       return ok(updateDebtService(args.id, args.payload));
+    } catch (error) {
+      if (error instanceof Error) return fail("VALIDATION_ERROR", error.message);
+      return toUnknownError(error);
+    }
+  });
+
+
+  ipcMain.handle("debts:delete", async (_event, args: { id: number }) => {
+    try {
+      return ok(deleteDebtService(args.id));
     } catch (error) {
       if (error instanceof Error) return fail("VALIDATION_ERROR", error.message);
       return toUnknownError(error);

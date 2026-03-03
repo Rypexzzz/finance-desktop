@@ -2,6 +2,7 @@ import {
   addDebtPayment,
   changeDebtStatus,
   createDebt,
+  deleteDebt,
   getDebtById,
   listDebtPayments,
   listDebts,
@@ -38,6 +39,14 @@ export function changeDebtStatusService(id: number, status: DebtStatus) {
   const updated = changeDebtStatus(id, status);
   if (!updated) throw new Error("Долг не найден");
   return { id: updated };
+}
+
+
+export function deleteDebtService(id: number) {
+  if (!Number.isInteger(id) || id <= 0) throw new Error("Некорректный ID долга");
+  const deleted = deleteDebt(id);
+  if (!deleted) throw new Error("Долг не найден");
+  return { id };
 }
 
 export function listDebtPaymentsService(debtId: number) {
