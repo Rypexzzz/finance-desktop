@@ -1,0 +1,22 @@
+appId: com.local.finance.desktop
+productName: Finance Desktop
+directories:
+  output: release
+
+files:
+  - dist/**
+  - dist-electron/**
+  - database/**
+  - package.json
+
+asarUnpack:
+  - node_modules/better-sqlite3/build/Release/*.node
+
+win:
+  target:
+    - nsis
+
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
