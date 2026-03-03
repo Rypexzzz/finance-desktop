@@ -1,5 +1,6 @@
 import { NavLink, useLocation } from "react-router-dom";
 import type { PropsWithChildren } from "react";
+import { useState } from "react";
 
 const navItems = [
   { to: "/dashboard", label: "Дашборд" },
@@ -12,19 +13,24 @@ const navItems = [
 
 export function AppShell({ children }: PropsWithChildren) {
   const location = useLocation();
+  const [collapsed, setCollapsed] = useState(false);
 
   return (
-    <div className="app-shell">
+    <div className={`app-shell ${collapsed ? "collapsed" : ""}`}>
       <aside className="sidebar">
         <div className="brand">💰 Finance Desktop</div>
+        <button className="btn ghost" onClick={() => setCollapsed((prev) => !prev)}>
+          {collapsed ? "→" : "←"}
+        </button>
         <nav className="nav">
           {navItems.map((item) => (
             <NavLink
               key={item.to}
               to={item.to}
               className={({ isActive }) => `nav-item ${isActive ? "active" : ""}`}
+              title={item.label}
             >
-              {item.label}
+              {collapsed ? item.label[0] : item.label}
             </NavLink>
           ))}
         </nav>

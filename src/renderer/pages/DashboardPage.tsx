@@ -2,6 +2,8 @@ import { useMemo, useState } from "react";
 import { useTransactions } from "../features/transactions/hooks";
 import { formatDateRu, formatRub } from "../lib/formatters";
 import { CategoryIcon } from "../components/CategoryIcon";
+import { useGoals } from "../features/goals/hooks";
+import { useDebts } from "../features/debts/hooks";
 
 function getMonthName(monthIndex: number) {
   return new Intl.DateTimeFormat("ru-RU", { month: "long" }).format(new Date(2025, monthIndex, 1));
@@ -111,6 +113,9 @@ export function DashboardPage() {
 
     return `conic-gradient(${stops.join(", ")})`;
   }, [breakdown]);
+
+  const goalsQuery = useGoals({ year, month: periodType === "month" ? month : 1 });
+  const debtsQuery = useDebts({ year, month: periodType === "month" ? month : 1 });
 
   const isLoading = monthQuery.isLoading || recentQuery.isLoading;
   const hasError = monthQuery.isError || recentQuery.isError;
@@ -265,6 +270,35 @@ export function DashboardPage() {
           </div>
         </section>
       </div>
+
+      <div className="dashboard-grid">
+        <section className="card">
+          <h3 className="dashboard-section-title">Цели накоплений</h3>
+          {(goalsQuery.data ?? []).slice(0, 4).map((goal) => {
+            const pct = Math.max(0, Math.min(100, Math.round(goal.progressTotal * 100)));
+            return (
+              <div className="dashboard-breakdown-row" key={goal.id}>
+                <span>{goal.name}</span>
+                <span>{pct}%</span>
+              </div>
+            );
+          })}
+        </section>
+
+        <section className="card">
+          <h3 className="dashboard-section-title">Долги</h3>
+          {(debtsQuery.data ?? []).slice(0, 4).map((debt) => {
+            const pct = Math.max(0, Math.min(100, Math.round(debt.progressTotal * 100)));
+            return (
+              <div className="dashboard-breakdown-row" key={debt.id}>
+                <span>{debt.name}</span>
+                <span>{pct}%</span>
+              </div>
+            );
+          })}
+        </section>
+      </div>
+
     </div>
   );
 }
