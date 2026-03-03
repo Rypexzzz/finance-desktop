@@ -24,6 +24,13 @@ export function GoalsPage() {
   const [monthlyPlanRub, setMonthlyPlanRub] = useState(0);
   const [deadlineDate, setDeadlineDate] = useState("");
 
+  const [contribAmount, setContribAmount] = useState(5000);
+  const [contribDate, setContribDate] = useState(TODAY);
+  const [contribComment, setContribComment] = useState("");
+
+  const [editName, setEditName] = useState("");
+  const [editPlan, setEditPlan] = useState(0);
+
   const goalsQuery = useGoals({ year, month });
   const contributionsQuery = useGoalContributions(selectedGoalId);
 
@@ -54,14 +61,28 @@ export function GoalsPage() {
     setName("");
   }
 
-  async function onAddContribution(goalId: number) {
-    const amount = Number(prompt("Сумма пополнения, ₽", "5000") ?? "0");
-    if (!Number.isInteger(amount) || amount <= 0) return;
-    await addContribution.mutateAsync({ goalId, payload: { amountRub: amount, date: TODAY } });
+  async function onAddContribution() {
+    if (!selectedGoalId) return;
+    await addContribution.mutateAsync({
+      goalId: selectedGoalId,
+      payload: { amountRub: contribAmount, date: contribDate, comment: contribComment || undefined }
+    });
+    setContribComment("");
   }
 
   async function onChangeStatus(goalId: number, status: GoalStatus) {
     await changeStatus.mutateAsync({ id: goalId, status });
+  }
+
+  async function onSaveEdit() {
+    if (!selectedGoalId) return;
+    await updateGoal.mutateAsync({
+      id: selectedGoalId,
+      payload: {
+        name: editName || undefined,
+        monthlyPlanRub: editPlan > 0 ? editPlan : null
+      }
+    });
   }
 
   return (
@@ -105,15 +126,30 @@ export function GoalsPage() {
               </div>
               <p className="muted">{formatRub(goal.currentAmountRub)} из {formatRub(goal.targetAmountRub)} {goal.deadlineDate ? `• до ${formatDateRu(goal.deadlineDate)}` : ""}</p>
               <div className="progress-bar"><div className="progress-fill" style={{ width: `${totalPercent}%` }} /></div>
-              <div className="goal-title-row"><span>Общий прогресс: {totalPercent}%</span><button className="btn" onClick={() => onAddContribution(goal.id)}>Пополнить</button></div>
+              <div className="goal-title-row"><span>Общий прогресс: {totalPercent}%</span><button className="btn" onClick={() => { setSelectedGoalId(goal.id); setEditName(goal.name); setEditPlan(goal.monthlyPlanRub ?? 0); }}>Выбрать</button></div>
               <div className="muted">За месяц: {goal.monthlyPlanRub ? `${monthPercent}% от плана` : formatRub(goal.monthContributionsRub)}</div>
-              <div className="row-actions" style={{ marginTop: 8 }}>
-                <button className="btn" onClick={() => setSelectedGoalId(goal.id)}>История</button>
-                <button className="btn" onClick={() => updateGoal.mutate({ id: goal.id, payload: { name: `${goal.name}` } })}>Сохранить</button>
-              </div>
             </div>
           );
         })}
+      </div>
+
+      <div className="card">
+        <h3>Управление целью {selectedGoal ? `— ${selectedGoal.name}` : ""}</h3>
+        {!selectedGoalId ? <p className="muted">Выберите цель для редактирования и пополнения.</p> : (
+          <>
+            <div className="analytics-filters-grid">
+              <label>Название<input value={editName} onChange={(e) => setEditName(e.target.value)} /></label>
+              <label>План/мес<input type="number" value={editPlan} onChange={(e) => setEditPlan(Number(e.target.value))} /></label>
+              <div className="form-actions-inline"><button className="btn" onClick={onSaveEdit}>Сохранить изменения</button></div>
+            </div>
+            <div className="analytics-filters-grid" style={{ marginTop: 12 }}>
+              <label>Сумма пополнения<input type="number" value={contribAmount} onChange={(e) => setContribAmount(Number(e.target.value))} /></label>
+              <label>Дата<input type="date" value={contribDate} onChange={(e) => setContribDate(e.target.value)} /></label>
+              <label>Комментарий<input value={contribComment} onChange={(e) => setContribComment(e.target.value)} /></label>
+              <div className="form-actions-inline"><button className="btn primary" onClick={onAddContribution}>Пополнить цель</button></div>
+            </div>
+          </>
+        )}
       </div>
 
       <div className="card">

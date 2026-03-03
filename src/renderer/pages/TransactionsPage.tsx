@@ -55,7 +55,7 @@ export function TransactionsPage() {
   });
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [isFiltersVisible, setIsFiltersVisible] = useState(true);
+  const [isFiltersVisible, setIsFiltersVisible] = useState(false);
   const [dialogMode, setDialogMode] = useState<"create" | "edit">("create");
   const [editingItem, setEditingItem] = useState<TransactionListItem | null>(
     null,

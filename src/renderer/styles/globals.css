@@ -885,3 +885,62 @@ input, select {
     grid-template-columns: 1fr;
   }
 }
+
+.trend-chart {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 8px;
+  align-items: end;
+  height: 220px;
+}
+
+.trend-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.trend-bars {
+  height: 180px;
+  width: 100%;
+  display: flex;
+  align-items: end;
+  justify-content: center;
+  gap: 3px;
+}
+
+.trend-bar {
+  width: 42%;
+  border-radius: 6px 6px 2px 2px;
+  min-height: 2px;
+}
+
+.trend-bar.income {
+  background: rgba(34, 197, 94, 0.85);
+}
+
+.trend-bar.expense {
+  background: rgba(239, 68, 68, 0.85);
+}
+
+.trend-label {
+  font-size: 11px;
+}
+
+.comparison-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+@media (max-width: 900px) {
+  .trend-chart {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    height: auto;
+  }
+
+  .comparison-grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -5,7 +5,8 @@ import {
   useChangeDebtStatus,
   useCreateDebt,
   useDebtPayments,
-  useDebts
+  useDebts,
+  useUpdateDebt
 } from "../features/debts/hooks";
 import type { DebtStatus, DebtType } from "../../shared/types/debt";
 
@@ -24,10 +25,18 @@ export function DebtsPage() {
   const [minimumPaymentRub, setMinimumPaymentRub] = useState(0);
   const [targetCloseDate, setTargetCloseDate] = useState("");
 
+  const [payAmount, setPayAmount] = useState(10000);
+  const [payDate, setPayDate] = useState(TODAY);
+  const [payComment, setPayComment] = useState("");
+
+  const [editName, setEditName] = useState("");
+  const [editPlan, setEditPlan] = useState(0);
+
   const debtsQuery = useDebts({ year, month });
   const paymentsQuery = useDebtPayments(selectedDebtId);
 
   const createDebt = useCreateDebt();
+  const updateDebt = useUpdateDebt();
   const changeStatus = useChangeDebtStatus();
   const addPayment = useAddDebtPayment();
 
@@ -54,10 +63,24 @@ export function DebtsPage() {
     setName("");
   }
 
-  async function onAddPayment(debtId: number) {
-    const amount = Number(prompt("Сумма погашения, ₽", "10000") ?? "0");
-    if (!Number.isInteger(amount) || amount <= 0) return;
-    await addPayment.mutateAsync({ debtId, payload: { amountRub: amount, date: TODAY } });
+  async function onAddPayment() {
+    if (!selectedDebtId) return;
+    await addPayment.mutateAsync({
+      debtId: selectedDebtId,
+      payload: { amountRub: payAmount, date: payDate, comment: payComment || undefined }
+    });
+    setPayComment("");
+  }
+
+  async function onSaveEdit() {
+    if (!selectedDebtId) return;
+    await updateDebt.mutateAsync({
+      id: selectedDebtId,
+      payload: {
+        name: editName || undefined,
+        monthlyPlanRub: editPlan > 0 ? editPlan : null
+      }
+    });
   }
 
   async function onChangeStatus(debtId: number, status: DebtStatus) {
@@ -103,12 +126,30 @@ export function DebtsPage() {
               </div>
               <p className="muted">Остаток {formatRub(debt.currentBalanceRub)} из {formatRub(debt.initialAmountRub)}</p>
               <div className="progress-bar"><div className="progress-fill" style={{ width: `${totalPercent}%` }} /></div>
-              <div className="goal-title-row"><span>Общий прогресс: {totalPercent}%</span><button className="btn" onClick={() => onAddPayment(debt.id)}>Погасить</button></div>
+              <div className="goal-title-row"><span>Общий прогресс: {totalPercent}%</span><button className="btn" onClick={() => { setSelectedDebtId(debt.id); setEditName(debt.name); setEditPlan(debt.monthlyPlanRub ?? 0); }}>Выбрать</button></div>
               <div className="muted">За месяц: {debt.monthlyPlanRub ? `${monthPercent}% от плана` : formatRub(debt.paidMonthRub)}</div>
-              <button className="btn" style={{ marginTop: 8 }} onClick={() => setSelectedDebtId(debt.id)}>История</button>
             </div>
           );
         })}
+      </div>
+
+      <div className="card">
+        <h3>Управление долгом {selectedDebt ? `— ${selectedDebt.name}` : ""}</h3>
+        {!selectedDebtId ? <p className="muted">Выберите долг для редактирования и погашения.</p> : (
+          <>
+            <div className="analytics-filters-grid">
+              <label>Название<input value={editName} onChange={(e) => setEditName(e.target.value)} /></label>
+              <label>План/мес<input type="number" value={editPlan} onChange={(e) => setEditPlan(Number(e.target.value))} /></label>
+              <div className="form-actions-inline"><button className="btn" onClick={onSaveEdit}>Сохранить изменения</button></div>
+            </div>
+            <div className="analytics-filters-grid" style={{ marginTop: 12 }}>
+              <label>Сумма погашения<input type="number" value={payAmount} onChange={(e) => setPayAmount(Number(e.target.value))} /></label>
+              <label>Дата<input type="date" value={payDate} onChange={(e) => setPayDate(e.target.value)} /></label>
+              <label>Комментарий<input value={payComment} onChange={(e) => setPayComment(e.target.value)} /></label>
+              <div className="form-actions-inline"><button className="btn primary" onClick={onAddPayment}>Погасить долг</button></div>
+            </div>
+          </>
+        )}
       </div>
 
       <div className="card">
