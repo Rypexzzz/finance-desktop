@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useTransactions } from "../features/transactions/hooks";
 import { formatDateRu, formatRub } from "../lib/formatters";
 import { CategoryIcon } from "../components/CategoryIcon";
@@ -8,6 +8,20 @@ function getMonthName(monthIndex: number) {
 }
 
 const BREAKDOWN_COLORS = ["#3b82f6", "#22c55e", "#f97316", "#a855f7", "#14b8a6", "#6b7280"];
+const MONTHS_RU = [
+  "Январь",
+  "Февраль",
+  "Март",
+  "Апрель",
+  "Май",
+  "Июнь",
+  "Июль",
+  "Август",
+  "Сентябрь",
+  "Октябрь",
+  "Ноябрь",
+  "Декабрь"
+];
 
 type BreakdownItem = {
   label: string;
@@ -17,21 +31,27 @@ type BreakdownItem = {
 
 export function DashboardPage() {
   const now = new Date();
-  const year = now.getFullYear();
-  const month = now.getMonth() + 1;
+  const currentYear = now.getFullYear();
+  const currentMonth = now.getMonth() + 1;
+  const [periodType, setPeriodType] = useState<"month" | "year">("month");
+  const [year, setYear] = useState(currentYear);
+  const [month, setMonth] = useState(currentMonth);
+
+  const yearOptions = Array.from({ length: 8 }, (_, i) => currentYear - i);
 
   const monthQuery = useTransactions({
-    periodType: "month",
+    periodType,
     year,
-    month,
+    month: periodType === "month" ? month : undefined,
     type: "all",
     page: 1,
     pageSize: 300
   });
 
   const recentQuery = useTransactions({
-    periodType: "year",
+    periodType,
     year,
+    month: periodType === "month" ? month : undefined,
     type: "all",
     sortBy: "date",
     sortDir: "desc",
@@ -99,7 +119,52 @@ export function DashboardPage() {
     <div className="page-stack">
       <div>
         <h1>Дашборд</h1>
-        <p className="muted">Обзор по месяцу, последние операции и структура расходов.</p>
+        <p className="muted">Выберите период, чтобы посмотреть сводку, последние операции и структуру расходов.</p>
+      </div>
+
+      <div className="card dashboard-period-card">
+        <div className="dashboard-period-grid">
+          <label>
+            Период
+            <select
+              value={periodType}
+              onChange={(e) => {
+                const nextType = e.target.value as "month" | "year";
+                setPeriodType(nextType);
+              }}
+            >
+              <option value="month">Месяц</option>
+              <option value="year">Год</option>
+            </select>
+          </label>
+
+          <label>
+            Год
+            <select value={year} onChange={(e) => setYear(Number(e.target.value))}>
+              {yearOptions.map((item) => (
+                <option key={item} value={item}>
+                  {item}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          {periodType === "month" && (
+            <label>
+              Месяц
+              <select value={month} onChange={(e) => setMonth(Number(e.target.value))}>
+                {MONTHS_RU.map((name, index) => {
+                  const monthValue = index + 1;
+                  return (
+                    <option key={monthValue} value={monthValue}>
+                      {name}
+                    </option>
+                  );
+                })}
+              </select>
+            </label>
+          )}
+        </div>
       </div>
 
       {hasError && (
@@ -112,10 +177,12 @@ export function DashboardPage() {
         <div className="card stat-card">
           <div className="stat-label">Доходы за месяц</div>
           <div className="stat-value income-text">{formatRub(summary.income)}</div>
-          <div className="stat-sub muted">{getMonthName(month - 1)} {year}</div>
+          <div className="stat-sub muted">
+            {periodType === "month" ? `${getMonthName(month - 1)} ${year}` : `За ${year} год`}
+          </div>
         </div>
         <div className="card stat-card">
-          <div className="stat-label">Расходы за месяц</div>
+          <div className="stat-label">Расходы за {periodType === "month" ? "месяц" : "год"}</div>
           <div className="stat-value expense-text">{formatRub(summary.expense)}</div>
           <div className="stat-sub muted">Без учета служебных</div>
         </div>
@@ -138,7 +205,9 @@ export function DashboardPage() {
         <section className="card">
           <div className="table-header">
             <h3>Последние операции</h3>
-            <span className="muted">{(recentQuery.data?.total ?? 0)} за {year} год</span>
+            <span className="muted">
+              {(recentQuery.data?.total ?? 0)} за {periodType === "month" ? `${getMonthName(month - 1)} ${year}` : `${year} год`}
+            </span>
           </div>
 
           {isLoading ? (
@@ -179,7 +248,9 @@ export function DashboardPage() {
 
           <div className="dashboard-breakdown-list">
             {breakdown.length === 0 ? (
-              <p className="muted">Нет расходных операций за текущий месяц.</p>
+              <p className="muted">
+                Нет расходных операций за {periodType === "month" ? "выбранный месяц" : "выбранный год"}.
+              </p>
             ) : (
               breakdown.map((item) => (
                 <div key={item.label} className="dashboard-breakdown-row">
