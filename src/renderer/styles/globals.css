@@ -38,6 +38,10 @@ a {
   min-height: 100%;
 }
 
+.app-shell.collapsed {
+  grid-template-columns: 84px 1fr;
+}
+
 .sidebar {
   border-right: 1px solid var(--border);
   background: #0f172a;
@@ -805,6 +809,79 @@ input, select {
 
 @media (max-width: 700px) {
   .dashboard-period-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+:root[data-theme="light"] {
+  --bg: #f3f6fb;
+  --surface: #ffffff;
+  --surface-2: #eef2f7;
+  --border: #d4dce8;
+  --text: #111827;
+  --muted: #6b7280;
+  --primary: #2563eb;
+  --shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
+}
+
+.analytics-filters-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(140px, 1fr));
+  gap: 12px;
+  align-items: end;
+}
+
+.goals-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.goal-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.progress-bar {
+  margin: 10px 0;
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(148, 163, 184, 0.25);
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #3b82f6, #22c55e);
+}
+
+.form-actions-inline {
+  display: flex;
+  align-items: flex-end;
+}
+
+.settings-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(180px, 1fr));
+  gap: 12px;
+}
+
+@media (max-width: 1000px) {
+  .analytics-filters-grid,
+  .settings-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .goals-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 700px) {
+  .analytics-filters-grid,
+  .settings-grid {
     grid-template-columns: 1fr;
   }
 }

@@ -59,3 +59,15 @@ export function getCategoryById(id: number): Category | null {
 
   return row ? mapRow(row) : null;
 }
+
+export function getCategoryByCode(code: string): Category | null {
+  const db = getDb();
+  const row = db
+    .prepare(
+      `SELECT id, code, name_ru, type, icon_name, color, is_service, sort_order, is_active
+       FROM categories WHERE code = ?`
+    )
+    .get(code) as CategoryRow | undefined;
+
+  return row ? mapRow(row) : null;
+}

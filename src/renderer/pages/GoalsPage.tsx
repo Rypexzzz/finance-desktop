@@ -1,0 +1,127 @@
+import { useMemo, useState } from "react";
+import { formatDateRu, formatRub } from "../lib/formatters";
+import {
+  useAddGoalContribution,
+  useChangeGoalStatus,
+  useCreateGoal,
+  useGoalContributions,
+  useGoals,
+  useUpdateGoal
+} from "../features/goals/hooks";
+import type { GoalStatus } from "../../shared/types/goal";
+
+const TODAY = new Date().toISOString().slice(0, 10);
+
+export function GoalsPage() {
+  const now = new Date();
+  const [year, setYear] = useState(now.getFullYear());
+  const [month, setMonth] = useState(now.getMonth() + 1);
+  const [selectedGoalId, setSelectedGoalId] = useState<number | undefined>();
+
+  const [name, setName] = useState("");
+  const [targetAmountRub, setTargetAmountRub] = useState(100000);
+  const [startAmountRub, setStartAmountRub] = useState(0);
+  const [monthlyPlanRub, setMonthlyPlanRub] = useState(0);
+  const [deadlineDate, setDeadlineDate] = useState("");
+
+  const goalsQuery = useGoals({ year, month });
+  const contributionsQuery = useGoalContributions(selectedGoalId);
+
+  const createGoal = useCreateGoal();
+  const updateGoal = useUpdateGoal();
+  const changeStatus = useChangeGoalStatus();
+  const addContribution = useAddGoalContribution();
+
+  const selectedGoal = (goalsQuery.data ?? []).find((goal) => goal.id === selectedGoalId);
+
+  const summary = useMemo(() => {
+    const goals = goalsQuery.data ?? [];
+    return {
+      total: goals.length,
+      completed: goals.filter((g) => g.status === "completed" || g.progressTotal >= 1).length,
+      monthAdded: goals.reduce((acc, g) => acc + g.monthContributionsRub, 0)
+    };
+  }, [goalsQuery.data]);
+
+  async function onCreateGoal() {
+    await createGoal.mutateAsync({
+      name,
+      targetAmountRub,
+      startAmountRub,
+      monthlyPlanRub: monthlyPlanRub > 0 ? monthlyPlanRub : null,
+      deadlineDate: deadlineDate || null
+    });
+    setName("");
+  }
+
+  async function onAddContribution(goalId: number) {
+    const amount = Number(prompt("Сумма пополнения, ₽", "5000") ?? "0");
+    if (!Number.isInteger(amount) || amount <= 0) return;
+    await addContribution.mutateAsync({ goalId, payload: { amountRub: amount, date: TODAY } });
+  }
+
+  async function onChangeStatus(goalId: number, status: GoalStatus) {
+    await changeStatus.mutateAsync({ id: goalId, status });
+  }
+
+  return (
+    <div className="page-stack">
+      <div>
+        <h1>Цели накоплений</h1>
+        <p className="muted">Полноценный учет целей: статус, пополнения, прогресс и история.</p>
+      </div>
+
+      <div className="card analytics-filters-grid">
+        <label>Год<input type="number" value={year} onChange={(e) => setYear(Number(e.target.value))} /></label>
+        <label>Месяц<input type="number" min={1} max={12} value={month} onChange={(e) => setMonth(Number(e.target.value))} /></label>
+      </div>
+
+      <div className="stats-grid">
+        <div className="card stat-card"><div className="stat-label">Всего целей</div><div className="stat-value">{summary.total}</div></div>
+        <div className="card stat-card"><div className="stat-label">Выполнено</div><div className="stat-value income-text">{summary.completed}</div></div>
+        <div className="card stat-card"><div className="stat-label">Пополнения за месяц</div><div className="stat-value">{formatRub(summary.monthAdded)}</div></div>
+      </div>
+
+      <div className="card analytics-filters-grid">
+        <label>Название<input value={name} onChange={(e) => setName(e.target.value)} /></label>
+        <label>Цель, ₽<input type="number" value={targetAmountRub} onChange={(e) => setTargetAmountRub(Number(e.target.value))} /></label>
+        <label>Старт, ₽<input type="number" value={startAmountRub} onChange={(e) => setStartAmountRub(Number(e.target.value))} /></label>
+        <label>План/мес, ₽<input type="number" value={monthlyPlanRub} onChange={(e) => setMonthlyPlanRub(Number(e.target.value))} /></label>
+        <label>Дедлайн<input type="date" value={deadlineDate} onChange={(e) => setDeadlineDate(e.target.value)} /></label>
+        <div className="form-actions-inline"><button className="btn primary" onClick={onCreateGoal}>+ Создать цель</button></div>
+      </div>
+
+      <div className="goals-grid">
+        {(goalsQuery.data ?? []).map((goal) => {
+          const totalPercent = Math.max(0, Math.min(100, Math.round(goal.progressTotal * 100)));
+          const monthPercent = goal.progressMonth === null ? null : Math.max(0, Math.min(100, Math.round(goal.progressMonth * 100)));
+          return (
+            <div className="card" key={goal.id}>
+              <div className="goal-title-row">
+                <strong>{goal.name}</strong>
+                <select value={goal.status} onChange={(e) => onChangeStatus(goal.id, e.target.value as GoalStatus)}>
+                  <option value="active">active</option><option value="paused">paused</option><option value="completed">completed</option><option value="cancelled">cancelled</option>
+                </select>
+              </div>
+              <p className="muted">{formatRub(goal.currentAmountRub)} из {formatRub(goal.targetAmountRub)} {goal.deadlineDate ? `• до ${formatDateRu(goal.deadlineDate)}` : ""}</p>
+              <div className="progress-bar"><div className="progress-fill" style={{ width: `${totalPercent}%` }} /></div>
+              <div className="goal-title-row"><span>Общий прогресс: {totalPercent}%</span><button className="btn" onClick={() => onAddContribution(goal.id)}>Пополнить</button></div>
+              <div className="muted">За месяц: {goal.monthlyPlanRub ? `${monthPercent}% от плана` : formatRub(goal.monthContributionsRub)}</div>
+              <div className="row-actions" style={{ marginTop: 8 }}>
+                <button className="btn" onClick={() => setSelectedGoalId(goal.id)}>История</button>
+                <button className="btn" onClick={() => updateGoal.mutate({ id: goal.id, payload: { name: `${goal.name}` } })}>Сохранить</button>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      <div className="card">
+        <h3>История пополнений {selectedGoal ? `— ${selectedGoal.name}` : ""}</h3>
+        {!selectedGoalId ? <p className="muted">Выберите цель, чтобы увидеть историю.</p> : (
+          <div className="table-wrap"><table className="table"><thead><tr><th>Дата</th><th className="align-right">Сумма</th><th>Комментарий</th></tr></thead><tbody>{(contributionsQuery.data ?? []).map((item) => <tr key={item.id}><td>{formatDateRu(item.date)}</td><td className="align-right">{formatRub(item.amountRub)}</td><td>{item.comment || "—"}</td></tr>)}</tbody></table></div>
+        )}
+      </div>
+    </div>
+  );
+}
