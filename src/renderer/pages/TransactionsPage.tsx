@@ -1,11 +1,14 @@
 import { useEffect, useMemo, useState } from "react";
-import type { TransactionListFilters, TransactionListItem } from "../../shared/types/transaction";
+import type {
+  TransactionListFilters,
+  TransactionListItem,
+} from "../../shared/types/transaction";
 import { useCategories } from "../features/categories/hooks";
 import {
   useCreateTransaction,
   useDeleteTransaction,
   useTransactions,
-  useUpdateTransaction
+  useUpdateTransaction,
 } from "../features/transactions/hooks";
 import { TransactionFilterBar } from "../features/transactions/components/TransactionFilterBar";
 import { TransactionsTable } from "../features/transactions/components/TransactionsTable";
@@ -25,7 +28,7 @@ const MONTHS_RU = [
   "сентябрь",
   "октябрь",
   "ноябрь",
-  "декабрь"
+  "декабрь",
 ];
 
 function getStatsPeriodLabel(filters: TransactionListFilters) {
@@ -48,14 +51,19 @@ export function TransactionsPage() {
     sortDir: "desc",
     page: 1,
     pageSize: 50,
-    search: ""
+    search: "",
   });
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isFiltersVisible, setIsFiltersVisible] = useState(true);
   const [dialogMode, setDialogMode] = useState<"create" | "edit">("create");
-  const [editingItem, setEditingItem] = useState<TransactionListItem | null>(null);
+  const [editingItem, setEditingItem] = useState<TransactionListItem | null>(
+    null,
+  );
   const [errorText, setErrorText] = useState<string>("");
-  const [createDefaultType, setCreateDefaultType] = useState<"expense" | "income">("expense");
+  const [createDefaultType, setCreateDefaultType] = useState<
+    "expense" | "income"
+  >("expense");
 
   const categoriesQuery = useCategories();
   const txQuery = useTransactions(filters);
@@ -68,12 +76,14 @@ export function TransactionsPage() {
 
   const categoryOptionsForFilter = useMemo(
     () => categories.filter((c) => c.isActive),
-    [categories]
+    [categories],
   );
 
   const selectedCategoryName = useMemo(() => {
     if (!filters.categoryId) return "все категории";
-    return categories.find((c) => c.id === filters.categoryId)?.nameRu ?? "категория";
+    return (
+      categories.find((c) => c.id === filters.categoryId)?.nameRu ?? "категория"
+    );
   }, [categories, filters.categoryId]);
 
   const summary = useMemo(() => {
@@ -92,7 +102,7 @@ export function TransactionsPage() {
       income,
       expense,
       service,
-      net: income - expense
+      net: income - expense,
     };
   }, [txQuery.data?.items]);
 
@@ -113,7 +123,7 @@ export function TransactionsPage() {
 
   const handleDelete = async (item: TransactionListItem) => {
     const ok = window.confirm(
-      `Удалить операцию "${item.categoryNameRu}" на ${item.amountRub} ₽?\nЭто действие нельзя отменить.`
+      `Удалить операцию "${item.categoryNameRu}" на ${item.amountRub} ₽?\nЭто действие нельзя отменить.`,
     );
     if (!ok) return;
 
@@ -133,7 +143,7 @@ export function TransactionsPage() {
       } else if (editingItem) {
         await updateMutation.mutateAsync({
           id: editingItem.id,
-          payload: values
+          payload: values,
         });
       }
       setIsDialogOpen(false);
@@ -163,16 +173,16 @@ export function TransactionsPage() {
     filters.type === "expense"
       ? "расходы"
       : filters.type === "income"
-      ? "доходы"
-      : filters.type === "service"
-      ? "служебные"
-      : "все";
+        ? "доходы"
+        : filters.type === "service"
+          ? "служебные"
+          : "все";
 
   const compactFiltersSummary = [
     `Период: ${periodLabel}`,
     `Тип: ${typeLabel}`,
     `Категория: ${selectedCategoryName}`,
-    (filters.search ?? "").trim() ? `Поиск: "${filters.search}"` : ""
+    (filters.search ?? "").trim() ? `Поиск: "${filters.search}"` : "",
   ]
     .filter(Boolean)
     .join(" • ");
@@ -182,14 +192,22 @@ export function TransactionsPage() {
       <div className="page-header-row">
         <div>
           <h1>Операции</h1>
-          <p className="muted">Добавление, редактирование и просмотр доходов/расходов.</p>
+          <p className="muted">
+            Добавление, редактирование и просмотр доходов/расходов.
+          </p>
         </div>
 
         <div className="header-actions">
-          <button className="btn expense-btn" onClick={() => openCreateDialog("expense")}>
+          <button
+            className="btn expense-btn"
+            onClick={() => openCreateDialog("expense")}
+          >
             + Расход
           </button>
-          <button className="btn income-btn" onClick={() => openCreateDialog("income")}>
+          <button
+            className="btn income-btn"
+            onClick={() => openCreateDialog("income")}
+          >
             + Доход
           </button>
         </div>
@@ -197,39 +215,64 @@ export function TransactionsPage() {
 
       {errorText && <div className="alert error">{errorText}</div>}
 
-      <details className="card filters-disclosure">
-        <summary className="filters-disclosure-summary">
-          <span className="filters-toggle-summary" title={compactFiltersSummary}>
+      <section
+        className="card filters-disclosure"
+        aria-label="Фильтры операций"
+      >
+        <div className="filters-disclosure-header">
+          <span
+            className="filters-toggle-summary"
+            title={compactFiltersSummary}
+          >
             {compactFiltersSummary}
           </span>
-          <span className="filters-disclosure-hint">Показать / скрыть фильтры</span>
-        </summary>
 
-        <div className="filters-disclosure-body">
-          <TransactionFilterBar
-            filters={filters}
-            onChange={(next) => setFilters({ ...next, page: 1 })}
-            categories={categoryOptionsForFilter}
-          />
+          <button
+            type="button"
+            className="filters-toggle-btn"
+            onClick={() => setIsFiltersVisible((prev) => !prev)}
+            aria-expanded={isFiltersVisible}
+          >
+            <span className="filters-toggle-btn-icon" aria-hidden="true">
+              {isFiltersVisible ? "▴" : "▾"}
+            </span>
+            {isFiltersVisible ? "Скрыть фильтры" : "Показать фильтры"}
+          </button>
         </div>
-      </details>
+
+        {isFiltersVisible && (
+          <div className="filters-disclosure-body">
+            <TransactionFilterBar
+              filters={filters}
+              onChange={(next) => setFilters({ ...next, page: 1 })}
+              categories={categoryOptionsForFilter}
+            />
+          </div>
+        )}
+      </section>
 
       <div className="stats-grid">
         <div className="card stat-card">
           <div className="stat-label">Доходы</div>
-          <div className="stat-value income-text">{formatRub(summary.income)}</div>
+          <div className="stat-value income-text">
+            {formatRub(summary.income)}
+          </div>
           <div className="stat-sub muted">Период: {periodLabel}</div>
         </div>
 
         <div className="card stat-card">
           <div className="stat-label">Расходы</div>
-          <div className="stat-value expense-text">{formatRub(summary.expense)}</div>
+          <div className="stat-value expense-text">
+            {formatRub(summary.expense)}
+          </div>
           <div className="stat-sub muted">Период: {periodLabel}</div>
         </div>
 
         <div className="card stat-card">
           <div className="stat-label">Чистый поток</div>
-          <div className={`stat-value ${summary.net >= 0 ? "income-text" : "expense-text"}`}>
+          <div
+            className={`stat-value ${summary.net >= 0 ? "income-text" : "expense-text"}`}
+          >
             {summary.net >= 0 ? "+" : "-"}
             {formatRub(Math.abs(summary.net))}
           </div>
@@ -239,7 +282,9 @@ export function TransactionsPage() {
         <div className="card stat-card">
           <div className="stat-label">Служебные</div>
           <div className="stat-value">{formatRub(summary.service)}</div>
-          <div className="stat-sub muted">Не входят в базовую аналитику (позже)</div>
+          <div className="stat-sub muted">
+            Не входят в базовую аналитику (позже)
+          </div>
         </div>
       </div>
 
