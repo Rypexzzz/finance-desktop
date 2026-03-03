@@ -1,73 +1,758 @@
-# React + TypeScript + Vite
+# Finance Desktop - Техническое задание (README)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Локальное десктоп-приложение для личного учета финансов под Windows, работающее полностью офлайн и сохраняющее данные в SQLite.
 
-Currently, two official plugins are available:
+## Статус документа
+- Версия: 1.0 (актуализирована по итогам обсуждения)
+- Назначение: единый README/ТЗ для дальнейшей разработки и сопровождения проекта
+- Формат: developer-ready (архитектура, модули, БД, UI/UX, roadmap, критерии приемки)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+---
 
-## React Compiler
+## 1. Цель продукта
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Создать десктоп-приложение для учета личных финансов, которое:
+- работает локально на ноутбуке пользователя
+- не требует интернета
+- хранит данные в локальной SQLite-базе
+- позволяет вести доходы/расходы по категориям
+- показывает статистику и аналитику
+- поддерживает цели накоплений
+- поддерживает учет кредитов и кредитных карт (в простом режиме)
+- отображает прогресс по целям и долгам (общий и за период)
+- имеет современный финтех-интерфейс (чистый, визуально приятный)
 
-## Expanding the ESLint configuration
+---
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## 2. Подтвержденные требования пользователя
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+### Платформа и эксплуатация
+- ОС: Windows
+- Нужен установщик: да
+- Автозапуск при старте Windows: нет
+- Работа полностью офлайн: да
+- Экспорт/импорт базы: нет (v1.0)
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+### Технологические предпочтения
+- Frontend: React
+- Локальный backend: Python или Node (на практике выбран Node внутри Electron)
+- БД: SQLite
+- Вес приложения/нагрузка: не критично (мощный ноутбук)
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+### Структура учета
+- Один пользователь
+- Операции в общем потоке (без отдельных счетов/кошельков на v1.0)
+- Переводы между счетами: не нужны
+- Начальные остатки: да (релевантно для целей/долгов)
+- Ручные корректировки баланса: нет
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### Ввод операций
+- Обязательные поля: сумма, дата, категория, комментарий
+- Подкатегории: не нужны (все как отдельные категории)
+- Теги: не нужны
+- Признак обязательного платежа: не нужен
+- Повторяющиеся операции: не нужны
+- Разбиение операции на несколько категорий: не нужно
+- Вложения (чеки): не нужны
+- Горячие клавиши: можно и желательно
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+### Категории
+- Только системные категории (без редактирования пользователем)
+- Список должен быть обширным
+- Доходы и расходы - отдельные наборы
+- Нужны служебные категории (например, погашение кредита)
+- У категорий должны быть иконки и цвета
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+### Цели накоплений
+- Простой режим: цель - это просто накопить сумму
+- Поля цели: нужны (название, сумма, дедлайн, стартовая сумма, план на месяц)
+- Прогресс: общий + за период
+- Несколько целей одновременно: да
+- Статусы целей: да
+
+### Кредиты и кредитные карты
+- Нужны оба типа: кредит и кредитная карта
+- Поля: название, остаток, цель/дата закрытия, минимальный платеж (опц.)
+- История изменений/погашений: можно (включено в ТЗ)
+- Прогресс: общий + за период
+- Погашение должно создавать запись в истории операций и обновлять долг: да
+- Напоминания: нет
+
+### Аналитика
+- Периоды: месяц и год
+- Фильтры: по категориям и типу операции
+- Метрики: доходы, расходы, чистый поток, средние значения, топ категорий (кроме списка "самые большие траты")
+- План/факт бюджеты: нет
+- История трат с фильтрами: да
+
+### Бюджеты
+- Не нужны (исключены из v1.0)
+
+### Интерфейс и дизайн
+- Стиль: финтех
+- Темы: светлая и темная
+- Приоритет: визуальная чистота (а не максимальная плотность данных)
+- Главная панель (Dashboard): нужна
+- Адаптивность под разные экраны ноутбука: нужна
+
+### Безопасность / приватность (v1.0)
+- Пароль/PIN: не нужен
+- Шифрование БД: не нужно
+- Бэкапы: не нужны
+- Экспорты отчетов: не нужны
+
+### Локализация и формат
+- Интерфейс: русский
+- Валюта: рубли (₽)
+- Копейки: не нужны (только целые рубли)
+- Формат отображения: русские форматы дат и сумм
+
+### Ожидания от результата
+- Нужен конечный продукт (поэтапно, но с упором на рабочее приложение)
+- Из технических ожиданий отдельно отмечена важность упаковки/релиза (установщик)
+
+---
+
+## 3. Архитектурное решение (утвержденное)
+
+### Выбранный стек
+- Desktop shell: Electron
+- Frontend: React + TypeScript + Vite
+- Локальный backend: Node.js (в Electron main process)
+- База данных: SQLite (better-sqlite3)
+- Графики: Recharts (или ECharts позже)
+- Установщик Windows: electron-builder (NSIS)
+
+### Почему выбран Electron + Node
+- Хорошая совместимость с Windows
+- Удобная упаковка в установщик
+- Не нужен отдельный локальный сервер/порт
+- Позволяет быстро сделать красивый UI и надежную локальную логику
+- Вес приложения не является ограничением
+
+### Архитектурные слои
+1. **Renderer (React UI)**
+   - страницы, формы, фильтры, графики, темы
+2. **Electron Main (backend + IPC)**
+   - бизнес-логика, доступ к БД, миграции, IPC handlers
+3. **SQLite**
+   - хранение данных, индексы, агрегации
+4. **Shared contracts/types**
+   - общие типы и контракты между main и renderer
+
+### Важные технические решения
+- `contextIsolation: true`
+- `nodeIntegration: false`
+- доступ к API только через `preload.ts` (typed bridge)
+- React роутинг в packaged app через `HashRouter`
+- Vite `base: "./"` для корректной загрузки ассетов из `file://`
+- Меню Electron (`File / Edit / View`) отключено через `Menu.setApplicationMenu(null)`
+- `electron` и `better-sqlite3` помечаются как external при сборке main (`tsup`)
+
+---
+
+## 4. Область охвата v1.0 (что входит / не входит)
+
+### Входит в v1.0
+- Дашборд (Dashboard)
+- История операций (доходы/расходы/служебные)
+- Добавление/редактирование/удаление операции
+- Аналитика (месяц/год)
+- Цели накоплений (список, пополнение, прогресс)
+- Долги (кредиты/кредитки, погашения, прогресс)
+- Настройки (тема, базовые параметры)
+- Системные категории (с иконками и цветами)
+- Установщик Windows
+
+### Не входит в v1.0
+- Бюджеты
+- Повторяющиеся операции
+- Подкатегории
+- Теги
+- Вложения чеков
+- Шифрование / пароль
+- Локальные бэкапы
+- Экспорт/импорт данных
+- Напоминания о платежах
+
+---
+
+## 5. Доменные сущности и правила учета
+
+### 5.1. Операции (transactions)
+Типы операций:
+- `income` - доход
+- `expense` - расход
+- `service` - служебная операция
+
+Обязательные поля операции:
+- сумма (`amount_rub`, целое > 0)
+- дата (`date`)
+- категория (`category_id`)
+- комментарий (`comment`, может быть пустым, но поле есть)
+
+Служебные операции используются для:
+- пополнения целей накоплений
+- погашения кредитов
+- погашения кредитных карт
+
+> В аналитике служебные операции по умолчанию исключаются из базовых графиков доходов/расходов.
+
+### 5.2. Цели накоплений (goals)
+Поля:
+- название
+- целевая сумма
+- стартовая сумма
+- план на месяц (опционально)
+- дедлайн (опционально)
+- статус
+
+Статусы:
+- `active`
+- `paused`
+- `completed`
+- `cancelled`
+
+Прогресс:
+- общий прогресс
+- прогресс за выбранный период (обычно текущий месяц)
+
+### 5.3. Долги (debts)
+Типы:
+- `loan` - кредит
+- `credit_card` - кредитная карта
+
+Поля:
+- тип
+- название
+- начальный долг
+- текущий остаток
+- план на месяц (опционально)
+- минимальный платеж (опционально)
+- целевая дата закрытия (опционально)
+- статус
+
+Статусы:
+- `active`
+- `paused`
+- `closed`
+- `cancelled`
+
+Погашение долга:
+- создает служебную транзакцию в истории операций
+- записывается в историю погашений долга
+- уменьшает текущий остаток
+- пересчитывает прогресс
+
+---
+
+## 6. Функциональные требования по модулям
+
+### 6.1. Модуль "Операции"
+
+#### Возможности
+- Создание операции (доход/расход)
+- Редактирование операции
+- Удаление операции (с подтверждением)
+- История операций (таблица)
+- Фильтрация:
+  - месяц/год
+  - тип (все / доход / расход / служебные)
+  - категория
+  - поиск по комментарию
+- Сортировка:
+  - по дате
+  - по сумме
+- Горячие клавиши:
+  - `Ctrl+N` - новая операция
+  - `Esc` - закрыть модалку
+  - `Enter` - сохранить форму
+
+#### UX улучшения (уже принятые решения)
+- Быстрые кнопки в header: `+ Расход`, `+ Доход`
+- Блок итогов за выбранный период над таблицей:
+  - доходы
+  - расходы
+  - чистый поток
+  - служебные
+- Иконки категорий в таблице
+- Эмодзи-префиксы в нативных выпадающих списках (временное решение)
+- Панель фильтров **скрываемая**, **скрыта по умолчанию**
+- При скрытых фильтрах отображается краткая строка-сводка текущих условий фильтрации
+- В карточках статистики период по умолчанию показывается как название месяца (например, `март`), а не как дата
+
+### 6.2. Модуль "Категории"
+- Только системный справочник категорий
+- Пользователь не может создавать/редактировать категории (v1.0)
+- Разделение на типы:
+  - доходы
+  - расходы
+  - служебные
+- Каждая категория имеет:
+  - название (RU)
+  - код
+  - тип
+  - иконку
+  - цвет
+  - порядок сортировки
+
+### 6.3. Модуль "Дашборд"
+Обязательные виджеты:
+- KPI за текущий месяц:
+  - доходы
+  - расходы
+  - чистый поток
+- Donut по расходам по категориям
+- График доходы/расходы по месяцам
+- Сравнение текущего месяца с прошлым
+- Мини-список целей с прогрессом
+- Мини-список долгов с прогрессом
+- Последние операции
+
+### 6.4. Модуль "Аналитика"
+Периоды:
+- Месяц
+- Год
+
+Фильтры:
+- тип
+- категория
+- выбор месяца/года
+
+Метрики:
+- Доходы
+- Расходы
+- Чистый поток
+- Средний расход в день (месяц)
+- Средний расход в месяц (год)
+- Топ категорий расходов
+
+Графики:
+- Donut по категориям
+- Доходы/расходы по месяцам (line/bar)
+- Сравнение месяцев
+- Топ категорий (bar)
+
+### 6.5. Модуль "Цели накоплений"
+- Создание/редактирование цели
+- Смена статуса
+- Пополнение цели (создание служебной транзакции + запись в историю цели)
+- Просмотр общего прогресса и прогресса за месяц
+- История пополнений
+
+### 6.6. Модуль "Долги"
+- Создание/редактирование долга
+- Смена статуса
+- Погашение (служебная транзакция + запись в историю долга)
+- Общий прогресс закрытия
+- Прогресс за месяц
+- История погашений
+
+### 6.7. Модуль "Настройки"
+Минимальный состав (v1.0):
+- Тема:
+  - светлая
+  - темная
+  - (опционально) системная
+- Информация о версии
+- Региональные параметры (фиксированные): русский, рубли, без копеек
+
+---
+
+## 7. UI/UX требования (финтех-стиль)
+
+### Основные принципы
+- Визуальная чистота
+- Минимальный шум
+- Четкая иерархия блоков
+- Понятные состояния (empty/loading/error)
+- Финтех-ощущение: карточки, KPI, аккуратные акценты
+
+### Навигация
+- Левый сайдбар (collapsible)
+- Верхний header страницы
+- Desktop-first layout, адаптация под ноутбуки
+
+### Темы
+- Светлая
+- Темная
+
+### Адаптивность
+Поддержка различных размеров окон ноутбука:
+- 13-14 дюймов (компактный режим)
+- стандартные Full HD экраны
+
+### Важные UX-детали
+- Быстрый ввод операций
+- Подтверждение удаления
+- Понятная обратная связь при ошибках
+- Форматирование сумм в рублях
+- Иконки и цветовая кодировка категорий
+
+---
+
+## 8. Экранная структура (Information Architecture)
+
+- **Дашборд**
+- **Операции**
+  - Список операций
+  - Модалка: добавить/редактировать
+- **Аналитика**
+- **Цели накоплений**
+  - Список целей
+  - Детали цели
+  - Модалки: создать/редактировать, пополнить
+- **Долги**
+  - Список долгов
+  - Детали долга
+  - Модалки: создать/редактировать, погашение
+- **Настройки**
+
+---
+
+## 9. Формулы и правила расчетов
+
+### 9.1. Чистый денежный поток
+`net_flow = total_income - total_expense`
+
+### 9.2. Цели накоплений
+`current_amount = start_amount + sum(contributions)`
+
+`progress_total = (current_amount - start_amount) / (target_amount - start_amount)`
+
+Прогресс за месяц:
+- если задан `monthly_plan_rub`: `progress_month = month_contributions / monthly_plan_rub`
+- если плана нет: показывается сумма пополнений за месяц
+
+### 9.3. Долги
+`progress_total = (initial_amount - current_balance) / initial_amount`
+
+Прогресс за месяц:
+- если задан `monthly_plan_rub`: `progress_month = paid_month / monthly_plan_rub`
+- если плана нет: показывается сумма погашений за месяц
+
+### 9.4. Служебные операции в аналитике
+- По умолчанию исключаются из базовой аналитики доходов/расходов
+- Могут отображаться отдельно (например, карточка "Служебные")
+
+---
+
+## 10. Модель данных SQLite (v1.0)
+
+### `app_settings`
+- `id INTEGER PRIMARY KEY`
+- `theme TEXT NOT NULL` (`light|dark|system`)
+- `currency TEXT NOT NULL DEFAULT 'RUB'`
+- `locale TEXT NOT NULL DEFAULT 'ru-RU'`
+- `created_at TEXT NOT NULL`
+- `updated_at TEXT NOT NULL`
+
+### `categories`
+- `id INTEGER PRIMARY KEY`
+- `code TEXT NOT NULL UNIQUE`
+- `name_ru TEXT NOT NULL`
+- `type TEXT NOT NULL` (`expense|income|service`)
+- `icon_name TEXT NOT NULL`
+- `color TEXT NOT NULL`
+- `is_service INTEGER NOT NULL DEFAULT 0`
+- `sort_order INTEGER NOT NULL DEFAULT 0`
+- `is_active INTEGER NOT NULL DEFAULT 1`
+
+### `transactions`
+- `id INTEGER PRIMARY KEY`
+- `type TEXT NOT NULL` (`expense|income|service`)
+- `category_id INTEGER NOT NULL`
+- `amount_rub INTEGER NOT NULL CHECK (amount_rub > 0)`
+- `date TEXT NOT NULL` (ISO `YYYY-MM-DD`)
+- `comment TEXT DEFAULT ''`
+- `created_at TEXT NOT NULL`
+- `updated_at TEXT NOT NULL`
+- `FOREIGN KEY (category_id) REFERENCES categories(id)`
+
+### `goals`
+- `id INTEGER PRIMARY KEY`
+- `name TEXT NOT NULL`
+- `target_amount_rub INTEGER NOT NULL CHECK (target_amount_rub > 0)`
+- `start_amount_rub INTEGER NOT NULL DEFAULT 0 CHECK (start_amount_rub >= 0)`
+- `monthly_plan_rub INTEGER` (nullable)
+- `deadline_date TEXT` (nullable)
+- `status TEXT NOT NULL DEFAULT 'active'`
+- `created_at TEXT NOT NULL`
+- `updated_at TEXT NOT NULL`
+
+### `goal_contributions`
+- `id INTEGER PRIMARY KEY`
+- `goal_id INTEGER NOT NULL`
+- `transaction_id INTEGER NOT NULL UNIQUE`
+- `amount_rub INTEGER NOT NULL CHECK (amount_rub > 0)`
+- `date TEXT NOT NULL`
+- `comment TEXT DEFAULT ''`
+- `created_at TEXT NOT NULL`
+- `FOREIGN KEY (goal_id) REFERENCES goals(id)`
+- `FOREIGN KEY (transaction_id) REFERENCES transactions(id)`
+
+### `debts`
+- `id INTEGER PRIMARY KEY`
+- `debt_type TEXT NOT NULL` (`loan|credit_card`)
+- `name TEXT NOT NULL`
+- `initial_amount_rub INTEGER NOT NULL CHECK (initial_amount_rub > 0)`
+- `current_balance_rub INTEGER NOT NULL CHECK (current_balance_rub >= 0)`
+- `monthly_plan_rub INTEGER` (nullable)
+- `minimum_payment_rub INTEGER` (nullable)
+- `target_close_date TEXT` (nullable)
+- `status TEXT NOT NULL DEFAULT 'active'`
+- `created_at TEXT NOT NULL`
+- `updated_at TEXT NOT NULL`
+
+### `debt_payments`
+- `id INTEGER PRIMARY KEY`
+- `debt_id INTEGER NOT NULL`
+- `transaction_id INTEGER NOT NULL UNIQUE`
+- `amount_rub INTEGER NOT NULL CHECK (amount_rub > 0)`
+- `date TEXT NOT NULL`
+- `balance_before_rub INTEGER NOT NULL`
+- `balance_after_rub INTEGER NOT NULL`
+- `comment TEXT DEFAULT ''`
+- `created_at TEXT NOT NULL`
+- `FOREIGN KEY (debt_id) REFERENCES debts(id)`
+- `FOREIGN KEY (transaction_id) REFERENCES transactions(id)`
+
+### Индексы (обязательные)
+- `idx_categories_type_sort_order`
+- `idx_transactions_date`
+- `idx_transactions_type`
+- `idx_transactions_category_id`
+- `idx_goal_contributions_goal_id_date`
+- `idx_debt_payments_debt_id_date`
+
+---
+
+## 11. IPC/API контракты (Renderer <-> Main)
+
+Все методы возвращают тип `ApiResult<T>`:
+- `{ ok: true, data }`
+- `{ ok: false, error: { code, message } }`
+
+### Categories
+- `categories.list({ type? })`
+
+### Transactions
+- `transactions.list(filters)`
+- `transactions.create(payload)`
+- `transactions.update(id, payload)`
+- `transactions.delete(id)`
+
+### Dashboard / Analytics (план)
+- `dashboard.getSummary({ year, month })`
+- `analytics.getMonthOverview(...)`
+- `analytics.getYearOverview(...)`
+- `analytics.getCategoryBreakdown(...)`
+- `analytics.getMonthlyTrend(...)`
+- `analytics.getMonthComparison(...)`
+
+### Goals (план)
+- `goals.list()`
+- `goals.create(payload)`
+- `goals.update(id, payload)`
+- `goals.changeStatus(id, status)`
+- `goals.getById(id)`
+- `goals.getProgress(id, { year, month })`
+- `goals.addContribution(id, { amount_rub, date, comment })`
+- `goals.getContributions(id, { page, pageSize })`
+
+### Debts (план)
+- `debts.list()`
+- `debts.create(payload)`
+- `debts.update(id, payload)`
+- `debts.changeStatus(id, status)`
+- `debts.getById(id)`
+- `debts.getProgress(id, { year, month })`
+- `debts.addPayment(id, { amount_rub, date, comment })`
+- `debts.getPayments(id, { page, pageSize })`
+
+---
+
+## 12. Системные категории (v1.0)
+
+### Расходы (пример утвержденного набора)
+- Еда и продукты
+- Кафе и рестораны
+- Транспорт
+- Такси
+- Жилье / аренда
+- ЖКХ / коммунальные
+- Мобильная связь
+- Связь и интернет
+- Маркетплейсы / онлайн-покупки
+- Одежда
+- Аптека
+- Медицина / клиники
+- Бытовые товары
+- Развлечения
+- Подписки и сервисы
+- Подарки
+- Путешествия
+- Спорт / фитнес
+- Автообслуживание
+- Прочие расходы
+
+### Доходы
+- Зарплата
+- Аванс
+- Фриланс / подработка
+- Бизнес / предпринимательство
+- Подарок / денежные поступления
+- Проценты / кэшбэк
+- Возврат средств
+- Прочие доходы
+
+### Служебные
+- Пополнение цели накопления
+- Погашение кредита
+- Погашение кредитной карты
+
+> В базе каждая категория хранит `code`, `icon_name`, `color`, что позволяет позже перейти с emoji на полноценные иконки UI-библиотеки без миграции данных.
+
+---
+
+## 13. Нефункциональные требования
+
+### Производительность
+- UI должен оставаться отзывчивым при 10k+ операций
+- Базовые экраны должны открываться быстро на современном ноутбуке
+
+### Надежность
+- Миграции БД при запуске
+- Корректная работа без интернета
+- Обработка ошибок записи в БД
+- Сохранение данных между перезапусками
+
+### Установка и релиз
+- Установщик Windows (NSIS)
+- Корректная packaged-сборка Electron (без белого окна и стандартного меню)
+- Локальная БД хранится в userData-папке приложения
+
+---
+
+## 14. Текущее состояние реализации (на момент этого README)
+
+### Уже реализовано
+- Electron + React + TypeScript + Vite каркас
+- SQLite + миграции + seed категорий
+- Безопасный preload + IPC для операций и категорий
+- Страница "Операции"
+- CRUD операций (создать / редактировать / удалить)
+- Фильтры (период/тип/категория/поиск)
+- Сохранение данных между перезапусками
+- Установщик Windows
+- UI-полировка модуля операций (частично):
+  - иконки категорий (emoji map)
+  - быстрые кнопки доход/расход
+  - блок итогов
+  - скрываемые фильтры
+  - период в карточках как название месяца
+
+### Еще не реализовано (следующие этапы)
+- Dashboard MVP (KPI + последние операции + 1 график)
+- Цели накоплений
+- Долги
+- Полная аналитика (месяц/год, графики)
+- Настройки темы (полноценный переключатель)
+- Доработка UI до финального финтех-вида
+
+---
+
+## 15. Roadmap (рекомендуемый порядок разработки)
+
+### Этап 1 - Foundation (завершен частично)
+- [x] Каркас Electron + React
+- [x] SQLite + миграции + seed
+- [x] IPC для операций
+- [x] CRUD операций
+- [x] Установщик Windows
+
+### Этап 2 - UX polish для Операций (в процессе)
+- [x] Иконки категорий (в таблице)
+- [x] Быстрые кнопки доход/расход
+- [x] Сводка/итоги за период
+- [x] Скрываемые фильтры
+- [ ] Кастомный Select для категорий с иконками (вместо нативного)
+- [ ] Светлая тема (переключатель)
+
+### Этап 3 - Dashboard MVP
+- [ ] KPI за текущий месяц
+- [ ] Последние операции
+- [ ] Donut по расходам по категориям
+
+### Этап 4 - Цели накоплений
+- [ ] Таблицы `goals`, `goal_contributions`
+- [ ] UI списка целей
+- [ ] Пополнение цели
+- [ ] Прогресс общий/за месяц
+
+### Этап 5 - Долги
+- [ ] Таблицы `debts`, `debt_payments`
+- [ ] UI списка долгов
+- [ ] Погашения
+- [ ] Прогресс общий/за месяц
+
+### Этап 6 - Аналитика
+- [ ] Месяц/год
+- [ ] Графики трендов
+- [ ] Сравнение месяцев
+- [ ] Топ категорий
+
+### Этап 7 - Полировка релиза
+- [ ] Темы (светлая/темная)
+- [ ] Empty/loading/error states во всех разделах
+- [ ] Финальная визуальная шлифовка
+- [ ] Smoke-тесты перед релизом
+
+---
+
+## 16. Критерии приемки (Acceptance Criteria)
+
+### Операции
+- Можно создать доход и расход с обязательными полями
+- Операция сохраняется в SQLite
+- После перезапуска данные не теряются
+- Фильтры корректно работают
+- Редактирование и удаление работают
+
+### UI/UX операций
+- Есть отдельные кнопки добавления дохода и расхода
+- Фильтры скрыты по умолчанию и раскрываются по запросу
+- В сводке период отображается как название месяца (для режима месяц)
+- Категории отображаются с визуальными идентификаторами (иконки/emoji)
+
+### Установка
+- Приложение устанавливается через Windows installer
+- Приложение запускается без белого окна
+- Отсутствует стандартное верхнее меню Electron (`File / Edit / View`)
+
+### Будущие модули (для приемки v1.0)
+- Цели и долги работают со служебными транзакциями
+- Аналитика считает корректные агрегаты по месяцу/году
+- Дашборд показывает KPI и графики без ошибок
+
+---
+
+## 17. Примечания по дальнейшей разработке
+
+1. Нативный HTML `<select>` не позволяет качественно отрисовать иконки внутри `option` на всех платформах. Для финального UI рекомендуется кастомный компонент Select.
+2. Служебные операции нужно строго отделять от обычных расходов/доходов в аналитике, иначе будут искажаться графики и KPI.
+3. При расширении проекта важно сохранять разделение слоев:
+   - repo (SQL)
+   - service (бизнес-логика)
+   - IPC handler (адаптер к UI)
+4. Для packaged-сборки Electron критичны:
+   - `HashRouter`
+   - `vite base: "./"`
+   - `external` для `electron` и native-модулей
+
+---
+
+## 18. Краткий итог
+
+Проект уже имеет рабочий фундамент: локальная БД, установщик, CRUD операций и сохранение данных между перезапусками. Следующий приоритет - довести UI/UX до уровня финтех-приложения и добавить ключевые модули: Dashboard, Цели, Долги и Аналитику.
+
