@@ -696,6 +696,17 @@ input, select {
 }
 
 /* ===== Dashboard MVP ===== */
+
+.dashboard-period-card {
+  padding: 14px;
+}
+
+.dashboard-period-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
 .dashboard-grid {
   display: grid;
   grid-template-columns: 1.3fr 1fr;
@@ -784,6 +795,16 @@ input, select {
 
 @media (max-width: 1100px) {
   .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-period-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 700px) {
+  .dashboard-period-grid {
     grid-template-columns: 1fr;
   }
 }
