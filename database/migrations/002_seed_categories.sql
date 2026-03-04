@@ -7,7 +7,7 @@ VALUES
 ('expense_transport', 'Транспорт', 'expense', 'car', '#3B82F6', 0, 30, 1),
 ('expense_taxi', 'Такси', 'expense', 'taxi', '#F59E0B', 0, 40, 1),
 ('expense_housing', 'Жильё / аренда', 'expense', 'home', '#8B5CF6', 0, 50, 1),
-('expense_utilities', 'ЖКХ / коммунальные', 'expense', 'bolt', '#06B6D4', 0, 60, 1),
+('expense_utilities', 'Коммуналка', 'expense', 'bolt', '#06B6D4', 0, 60, 1),
 ('expense_mobile', 'Мобильная связь', 'expense', 'smartphone', '#0EA5E9', 0, 70, 1),
 ('expense_internet', 'Связь и интернет', 'expense', 'wifi', '#14B8A6', 0, 80, 1),
 ('expense_marketplace', 'Маркетплейсы / онлайн-покупки', 'expense', 'package', '#A855F7', 0, 90, 1),
@@ -22,11 +22,12 @@ VALUES
 ('expense_fitness', 'Спорт / фитнес', 'expense', 'dumbbell', '#84CC16', 0, 180, 1),
 ('expense_auto_service', 'Автообслуживание', 'expense', 'wrench', '#78716C', 0, 190, 1),
 ('expense_other', 'Прочие расходы', 'expense', 'circle-help', '#94A3B8', 0, 999, 1),
+('expense_fastfood', 'Фастфуд', 'expense', 'utensils', '#F97316', 0, 200, 1),
+('expense_supermarket', 'Супермаркет', 'expense', 'shopping-cart', '#EF4444', 0, 210, 1),
 
 -- INCOME
 ('income_salary', 'Зарплата', 'income', 'wallet', '#22C55E', 0, 10, 1),
-('income_advance', 'Аванс', 'income', 'banknote', '#16A34A', 0, 20, 1),
-('income_freelance', 'Фриланс / подработка', 'income', 'laptop', '#10B981', 0, 30, 1),
+('income_freelance', 'Репетиторство', 'income', 'laptop', '#10B981', 0, 30, 1),
 ('income_business', 'Бизнес / предпринимательство', 'income', 'building-2', '#059669', 0, 40, 1),
 ('income_gift', 'Подарок / денежные поступления', 'income', 'gift', '#34D399', 0, 50, 1),
 ('income_cashback', 'Проценты / кэшбэк', 'income', 'coins', '#65A30D', 0, 60, 1),

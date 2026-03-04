@@ -157,7 +157,6 @@ export function TransactionFormDialog({
               Комментарий
               <input
                 type="text"
-                placeholder="Например: Пятёрочка / такси / зарплата"
                 {...form.register("comment")}
               />
             </label>
