@@ -159,6 +159,12 @@ export function GoalsPage() {
                 </select>
               </div>
               <p className="muted">{formatRub(goal.currentAmountRub)} из {formatRub(goal.targetAmountRub)} {goal.deadlineDate ? `• до ${formatDateRu(goal.deadlineDate)}` : ""}</p>
+              {monthPercent !== null && (
+                <>
+                  <div className="progress-bar"><div className="progress-fill" style={{ width: `${monthPercent}%` }} /></div>
+                  <div className="muted">Прогресс за месяц: {monthPercent}%</div>
+                </>
+              )}
               <div className="progress-bar"><div className="progress-fill" style={{ width: `${totalPercent}%` }} /></div>
               <div className="goal-title-row"><span>Общий прогресс: {totalPercent}%</span><button className="btn" onClick={() => { setSelectedGoalId(goal.id); setEditName(goal.name); setEditPlan(goal.monthlyPlanRub ?? 0); }}>Выбрать</button></div>
               <div className="muted">За месяц: {goal.monthlyPlanRub ? `${monthPercent}% от плана` : formatRub(goal.monthContributionsRub)}</div>

@@ -82,6 +82,9 @@ export function IconSelect({ options, value, onChange, placeholder = "Выбер
               aria-selected={item.value === value}
               data-index={index}
               className={`icon-select-item ${item.value === value ? "active" : ""}`}
+              onMouseDown={(e) => {
+                e.preventDefault();
+              }}
               onClick={() => {
                 onChange(item.value);
                 setOpen(false);

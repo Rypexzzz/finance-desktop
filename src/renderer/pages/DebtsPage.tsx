@@ -13,6 +13,22 @@ import type { DebtStatus, DebtType } from "../../shared/types/debt";
 
 const TODAY = new Date().toISOString().slice(0, 10);
 
+function getMonthsUntilDate(targetDate: string): number | null {
+  if (!targetDate) return null;
+  const parsed = new Date(targetDate);
+  if (Number.isNaN(parsed.getTime())) return null;
+  const now = new Date(TODAY);
+  const months = (parsed.getFullYear() - now.getFullYear()) * 12 + (parsed.getMonth() - now.getMonth()) + 1;
+  return Math.max(1, months);
+}
+
+function buildDeadlineFromMonthlyPlan(initialAmount: number, monthlyPlan: number): string {
+  const monthsRequired = Math.max(1, Math.ceil(initialAmount / monthlyPlan));
+  const deadline = new Date(TODAY);
+  deadline.setMonth(deadline.getMonth() + monthsRequired - 1);
+  return deadline.toISOString().slice(0, 10);
+}
+
 const DEBT_STATUS_LABELS: Record<DebtStatus, string> = {
   active: "Активный",
   paused: "На паузе",
@@ -72,6 +88,19 @@ export function DebtsPage() {
     setName("");
   }
 
+  function onTargetCloseDateChange(value: string) {
+    setTargetCloseDate(value);
+    const months = getMonthsUntilDate(value);
+    if (!months || initialAmountRub <= 0) return;
+    setMonthlyPlanRub(Math.ceil(initialAmountRub / months));
+  }
+
+  function onMonthlyPlanChange(value: number) {
+    setMonthlyPlanRub(value);
+    if (!Number.isFinite(value) || value <= 0 || initialAmountRub <= 0) return;
+    setTargetCloseDate(buildDeadlineFromMonthlyPlan(initialAmountRub, value));
+  }
+
   async function onAddPayment() {
     if (!selectedDebtId) return;
     await addPayment.mutateAsync({
@@ -122,9 +151,9 @@ export function DebtsPage() {
         <label>Тип<select value={debtType} onChange={(e) => setDebtType(e.target.value as DebtType)}><option value="loan">Кредит</option><option value="credit_card">Кредитная карта</option></select></label>
         <label>Название<input value={name} onChange={(e) => setName(e.target.value)} /></label>
         <label>Начальный долг, ₽<input type="number" value={initialAmountRub} onChange={(e) => setInitialAmountRub(Number(e.target.value))} /></label>
-        <label>План/мес, ₽<input type="number" value={monthlyPlanRub} onChange={(e) => setMonthlyPlanRub(Number(e.target.value))} /></label>
+        <label>План/мес, ₽<input type="number" value={monthlyPlanRub} onChange={(e) => onMonthlyPlanChange(Number(e.target.value))} /></label>
         <label>Мин. платеж, ₽<input type="number" value={minimumPaymentRub} onChange={(e) => setMinimumPaymentRub(Number(e.target.value))} /></label>
-        <label>Цель закрытия<input type="date" value={targetCloseDate} onChange={(e) => setTargetCloseDate(e.target.value)} /></label>
+        <label>Цель закрытия<input type="date" value={targetCloseDate} onChange={(e) => onTargetCloseDateChange(e.target.value)} /></label>
         <div className="form-actions-inline"><button className="btn primary" onClick={onCreateDebt}>+ Добавить долг</button></div>
       </div>
 
@@ -141,6 +170,12 @@ export function DebtsPage() {
                 </select>
               </div>
               <p className="muted">Остаток {formatRub(debt.currentBalanceRub)} из {formatRub(debt.initialAmountRub)}</p>
+              {monthPercent !== null && (
+                <>
+                  <div className="progress-bar"><div className="progress-fill" style={{ width: `${monthPercent}%` }} /></div>
+                  <div className="muted">Прогресс за месяц: {monthPercent}%</div>
+                </>
+              )}
               <div className="progress-bar"><div className="progress-fill" style={{ width: `${totalPercent}%` }} /></div>
               <div className="goal-title-row"><span>Общий прогресс: {totalPercent}%</span><div className="row-actions"><button className="btn" onClick={() => { setSelectedDebtId(debt.id); setEditName(debt.name); setEditPlan(debt.monthlyPlanRub ?? 0); }}>Выбрать</button><button className="btn ghost danger" onClick={() => onDeleteDebt(debt.id)}>Удалить долг</button></div></div>
               <div className="muted">За месяц: {debt.monthlyPlanRub ? `${monthPercent}% от плана` : formatRub(debt.paidMonthRub)}</div>
