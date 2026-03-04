@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { Category } from "../../../../shared/types/category";
 import type { TransactionListItem } from "../../../../shared/types/transaction";
-import { getTodayIsoDate } from "../../../lib/formatters";
+import { formatIsoDateToRuInput, getTodayRuDate } from "../../../lib/formatters";
 import { getCategoryEmoji } from "../../../components/CategoryIcon";
 import { IconSelect } from "../../../components/IconSelect";
 import { transactionFormSchema, type TransactionFormValues } from "../schemas";
@@ -33,7 +33,7 @@ export function TransactionFormDialog({
       type: "expense",
       categoryId: undefined as unknown as number,
       amountRub: undefined as unknown as number,
-      date: getTodayIsoDate(),
+      date: getTodayRuDate(),
       comment: ""
     }
   });
@@ -53,7 +53,7 @@ export function TransactionFormDialog({
         type: initial.type === "service" ? "expense" : initial.type,
         categoryId: initial.categoryId,
         amountRub: initial.amountRub,
-        date: initial.date,
+        date: formatIsoDateToRuInput(initial.date),
         comment: initial.comment ?? ""
       });
     } else {
@@ -62,7 +62,7 @@ export function TransactionFormDialog({
         type: defaultType,
         categoryId: (firstCategory?.id ?? categories[0]?.id) as number,
         amountRub: undefined as unknown as number,
-        date: getTodayIsoDate(),
+        date: getTodayRuDate(),
         comment: ""
       });
     }
@@ -111,7 +111,15 @@ export function TransactionFormDialog({
 
             <label>
               Сумма (₽)
-              <input type="number" step="1" min="1" {...form.register("amountRub")} />
+              <input
+                type="number"
+                step="1"
+                min="1"
+                placeholder="Введите сумму"
+                {...form.register("amountRub", {
+                  setValueAs: (value) => (value === "" ? undefined : Number(value))
+                })}
+              />
               {form.formState.errors.amountRub && (
                 <span className="field-error">{form.formState.errors.amountRub.message}</span>
               )}
@@ -119,7 +127,13 @@ export function TransactionFormDialog({
 
             <label>
               Дата
-              <input type="date" {...form.register("date")} />
+              <input
+                type="text"
+                inputMode="numeric"
+                placeholder="дд.мм.гггг"
+                maxLength={10}
+                {...form.register("date")}
+              />
               {form.formState.errors.date && (
                 <span className="field-error">{form.formState.errors.date.message}</span>
               )}

@@ -12,6 +12,21 @@ import type { GoalStatus } from "../../shared/types/goal";
 
 const TODAY = new Date().toISOString().slice(0, 10);
 
+const MONTHS_RU = [
+  "Январь",
+  "Февраль",
+  "Март",
+  "Апрель",
+  "Май",
+  "Июнь",
+  "Июль",
+  "Август",
+  "Сентябрь",
+  "Октябрь",
+  "Ноябрь",
+  "Декабрь"
+];
+
 const GOAL_STATUS_LABELS: Record<GoalStatus, string> = {
   active: "Активная",
   paused: "На паузе",
@@ -100,8 +115,20 @@ export function GoalsPage() {
       </div>
 
       <div className="card analytics-filters-grid">
-        <label>Год<input type="number" value={year} onChange={(e) => setYear(Number(e.target.value))} /></label>
-        <label>Месяц<input type="number" min={1} max={12} value={month} onChange={(e) => setMonth(Number(e.target.value))} /></label>
+        <label>
+          Год
+          <input type="number" value={year} onChange={(e) => setYear(Number(e.target.value))} />
+        </label>
+        <label>
+          Месяц
+          <select value={month} onChange={(e) => setMonth(Number(e.target.value))}>
+            {MONTHS_RU.map((monthName, index) => (
+              <option key={monthName} value={index + 1}>
+                {monthName}
+              </option>
+            ))}
+          </select>
+        </label>
       </div>
 
       <div className="stats-grid">

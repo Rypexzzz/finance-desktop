@@ -76,11 +76,21 @@ export function TransactionsTable({ items, total, onEdit, onDelete }: Props) {
 
                   <td className="align-right">
                     <div className="row-actions">
-                      <button className="btn ghost" onClick={() => onEdit(item)}>
-                        Ред.
+                      <button
+                        className="btn ghost icon-action-btn"
+                        onClick={() => onEdit(item)}
+                        title="Редактировать"
+                        aria-label="Редактировать"
+                      >
+                        ✏️
                       </button>
-                      <button className="btn ghost danger" onClick={() => onDelete(item)}>
-                        Удалить
+                      <button
+                        className="btn ghost danger icon-action-btn"
+                        onClick={() => onDelete(item)}
+                        title="Удалить"
+                        aria-label="Удалить"
+                      >
+                        🗑️
                       </button>
                     </div>
                   </td>
