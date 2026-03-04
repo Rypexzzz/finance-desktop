@@ -11,7 +11,7 @@ export function AppRouter() {
     <HashRouter>
       <AppShell>
         <Routes>
-          <Route path="/" element={<Navigate to="/analytics" replace />} />
+          <Route path="/" element={<Navigate to="/transactions" replace />} />
           <Route path="/transactions" element={<TransactionsPage />} />
           <Route path="/analytics" element={<AnalyticsPage />} />
           <Route path="/goals" element={<GoalsPage />} />
