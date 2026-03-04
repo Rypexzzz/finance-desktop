@@ -50,10 +50,22 @@ a {
   grid-template-columns: 84px 1fr;
 }
 
+.app-shell.collapsed .sidebar-toggle {
+  padding-left: 0;
+  padding-right: 0;
+}
+
 .sidebar {
   border-right: 1px solid var(--border);
   background: var(--surface-elevated);
   padding: 16px;
+}
+
+.sidebar-toggle {
+  width: 100%;
+  min-height: 42px;
+  margin-bottom: 14px;
+  border-radius: 12px;
 }
 
 .brand {
@@ -110,6 +122,16 @@ a {
 .topbar-subtitle {
   color: var(--muted);
   font-size: 12px;
+}
+
+.settings-trigger {
+  font-size: 18px;
+  line-height: 1;
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .content {
@@ -399,6 +421,25 @@ input, select {
   justify-content: flex-end;
   gap: 10px;
   margin-top: 14px;
+}
+
+.settings-modal {
+  max-width: 700px;
+}
+
+.settings-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.settings-modal-subtitle {
+  margin: 0 0 14px;
+}
+
+.delete-confirm-modal {
+  max-width: 520px;
 }
 
 @media (max-width: 1200px) {
