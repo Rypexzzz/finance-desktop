@@ -64,6 +64,7 @@ export function TransactionsPage() {
   const [createDefaultType, setCreateDefaultType] = useState<
     "expense" | "income"
   >("expense");
+  const [deletingItem, setDeletingItem] = useState<TransactionListItem | null>(null);
 
   const categoriesQuery = useCategories();
   const txQuery = useTransactions(filters);
@@ -122,14 +123,15 @@ export function TransactionsPage() {
   };
 
   const handleDelete = async (item: TransactionListItem) => {
-    const ok = window.confirm(
-      `Удалить операцию "${item.categoryNameRu}" на ${item.amountRub} ₽?\nЭто действие нельзя отменить.`,
-    );
-    if (!ok) return;
+    setDeletingItem(item);
+  };
 
+  const confirmDelete = async () => {
+    if (!deletingItem) return;
     setErrorText("");
     try {
-      await deleteMutation.mutateAsync(item.id);
+      await deleteMutation.mutateAsync(deletingItem.id);
+      setDeletingItem(null);
     } catch (e) {
       setErrorText(e instanceof Error ? e.message : "Ошибка удаления");
     }
@@ -317,6 +319,27 @@ export function TransactionsPage() {
         onClose={() => setIsDialogOpen(false)}
         onSubmit={handleDialogSubmit}
       />
+
+      {deletingItem && (
+        <div className="modal-overlay" role="dialog" aria-modal="true" aria-label="Подтверждение удаления" onClick={() => setDeletingItem(null)}>
+          <div className="modal delete-confirm-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>Удалить операцию?</h3>
+            </div>
+            <p>
+              Операция «{deletingItem.categoryNameRu}» на <b>{formatRub(deletingItem.amountRub)}</b> будет удалена без возможности восстановления.
+            </p>
+            <div className="modal-actions">
+              <button className="btn" onClick={() => setDeletingItem(null)}>
+                Отмена
+              </button>
+              <button className="btn ghost danger" onClick={confirmDelete}>
+                Удалить
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
