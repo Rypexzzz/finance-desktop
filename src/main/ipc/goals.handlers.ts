@@ -4,6 +4,8 @@ import {
   addGoalContributionService,
   changeGoalStatusService,
   createGoalService,
+  getGoalByIdService,
+  getGoalProgressService,
   listGoalContributionsService,
   listGoalsService,
   updateGoalService
@@ -49,7 +51,34 @@ export function registerGoalsHandlers() {
 
   ipcMain.handle("goals:contributions", async (_event, args: { goalId: number }) => {
     try {
-      return ok(listGoalContributionsService(args.goalId));
+      return ok(listGoalContributionsService(args.goalId).items);
+    } catch (error) {
+      if (error instanceof Error) return fail("VALIDATION_ERROR", error.message);
+      return toUnknownError(error);
+    }
+  });
+
+  ipcMain.handle("goals:getById", async (_event, args: { id: number; year?: number; month?: number }) => {
+    try {
+      return ok(getGoalByIdService(args.id, { year: args.year, month: args.month }));
+    } catch (error) {
+      if (error instanceof Error) return fail("VALIDATION_ERROR", error.message);
+      return toUnknownError(error);
+    }
+  });
+
+  ipcMain.handle("goals:getProgress", async (_event, args: { id: number; year?: number; month?: number }) => {
+    try {
+      return ok(getGoalProgressService(args.id, { year: args.year, month: args.month }));
+    } catch (error) {
+      if (error instanceof Error) return fail("VALIDATION_ERROR", error.message);
+      return toUnknownError(error);
+    }
+  });
+
+  ipcMain.handle("goals:getContributions", async (_event, args: { goalId: number; page?: number; pageSize?: number }) => {
+    try {
+      return ok(listGoalContributionsService(args.goalId, { page: args.page, pageSize: args.pageSize }));
     } catch (error) {
       if (error instanceof Error) return fail("VALIDATION_ERROR", error.message);
       return toUnknownError(error);

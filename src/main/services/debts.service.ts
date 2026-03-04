@@ -21,6 +21,24 @@ export function listDebtsService(params?: { year?: number; month?: number }) {
   return listDebts(params?.year ?? now.getFullYear(), params?.month ?? now.getMonth() + 1);
 }
 
+export function getDebtByIdService(debtId: number, params?: { year?: number; month?: number }) {
+  if (!Number.isInteger(debtId) || debtId <= 0) throw new Error("Некорректный ID долга");
+  const now = new Date();
+  const debt = listDebts(params?.year ?? now.getFullYear(), params?.month ?? now.getMonth() + 1).find((item) => item.id === debtId);
+  if (!debt) throw new Error("Долг не найден");
+  return debt;
+}
+
+export function getDebtProgressService(debtId: number, params?: { year?: number; month?: number }) {
+  const debt = getDebtByIdService(debtId, params);
+  return {
+    progressTotal: debt.progressTotal,
+    progressMonth: debt.progressMonth,
+    paidMonthRub: debt.paidMonthRub,
+    currentBalanceRub: debt.currentBalanceRub
+  };
+}
+
 export function createDebtService(payload: CreateDebtInput) {
   if (!payload.name?.trim()) throw new Error("Название долга обязательно");
   if (!Number.isInteger(payload.initialAmountRub) || payload.initialAmountRub <= 0) throw new Error("Сумма должна быть > 0");
@@ -49,9 +67,9 @@ export function deleteDebtService(id: number) {
   return { id };
 }
 
-export function listDebtPaymentsService(debtId: number) {
+export function listDebtPaymentsService(debtId: number, params?: { page?: number; pageSize?: number }) {
   if (!Number.isInteger(debtId) || debtId <= 0) throw new Error("Некорректный ID долга");
-  return listDebtPayments(debtId);
+  return listDebtPayments(debtId, params?.page ?? 1, params?.pageSize ?? 20);
 }
 
 export function addDebtPaymentService(debtId: number, payload: AddDebtPaymentInput) {

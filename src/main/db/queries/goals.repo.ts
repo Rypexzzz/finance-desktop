@@ -88,10 +88,15 @@ export function getGoalById(id: number) {
   return db.prepare("SELECT * FROM goals WHERE id = ?").get(id) as any;
 }
 
-export function listGoalContributions(goalId: number): GoalContribution[] {
+export function listGoalContributions(goalId: number, page = 1, pageSize = 20): { items: GoalContribution[]; total: number } {
   const db = getDb();
-  const rows = db.prepare(`SELECT * FROM goal_contributions WHERE goal_id = ? ORDER BY date DESC, id DESC`).all(goalId) as Array<any>;
-  return rows.map((row) => ({
+  const limit = Math.max(1, Math.min(pageSize, 200));
+  const offset = Math.max(0, (page - 1) * limit);
+  const totalRow = db.prepare(`SELECT COUNT(*) as total FROM goal_contributions WHERE goal_id = ?`).get(goalId) as { total: number };
+  const rows = db.prepare(`SELECT * FROM goal_contributions WHERE goal_id = ? ORDER BY date DESC, id DESC LIMIT ? OFFSET ?`).all(goalId, limit, offset) as Array<any>;
+  return {
+    total: totalRow?.total ?? 0,
+    items: rows.map((row) => ({
     id: row.id,
     goalId: row.goal_id,
     transactionId: row.transaction_id,
@@ -99,7 +104,8 @@ export function listGoalContributions(goalId: number): GoalContribution[] {
     date: row.date,
     comment: row.comment ?? "",
     createdAt: row.created_at
-  }));
+  }))
+  };
 }
 
 export function addGoalContribution(goalId: number, transactionId: number, payload: AddGoalContributionInput): number {

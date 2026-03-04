@@ -5,6 +5,8 @@ import {
   changeDebtStatusService,
   createDebtService,
   deleteDebtService,
+  getDebtByIdService,
+  getDebtProgressService,
   listDebtPaymentsService,
   listDebtsService,
   updateDebtService
@@ -60,7 +62,7 @@ export function registerDebtsHandlers() {
 
   ipcMain.handle("debts:payments", async (_event, args: { debtId: number }) => {
     try {
-      return ok(listDebtPaymentsService(args.debtId));
+      return ok(listDebtPaymentsService(args.debtId).items);
     } catch (error) {
       if (error instanceof Error) return fail("VALIDATION_ERROR", error.message);
       return toUnknownError(error);
@@ -70,6 +72,33 @@ export function registerDebtsHandlers() {
   ipcMain.handle("debts:addPayment", async (_event, args: { debtId: number; payload: AddDebtPaymentInput }) => {
     try {
       return ok(addDebtPaymentService(args.debtId, args.payload));
+    } catch (error) {
+      if (error instanceof Error) return fail("VALIDATION_ERROR", error.message);
+      return toUnknownError(error);
+    }
+  });
+
+  ipcMain.handle("debts:getById", async (_event, args: { id: number; year?: number; month?: number }) => {
+    try {
+      return ok(getDebtByIdService(args.id, { year: args.year, month: args.month }));
+    } catch (error) {
+      if (error instanceof Error) return fail("VALIDATION_ERROR", error.message);
+      return toUnknownError(error);
+    }
+  });
+
+  ipcMain.handle("debts:getProgress", async (_event, args: { id: number; year?: number; month?: number }) => {
+    try {
+      return ok(getDebtProgressService(args.id, { year: args.year, month: args.month }));
+    } catch (error) {
+      if (error instanceof Error) return fail("VALIDATION_ERROR", error.message);
+      return toUnknownError(error);
+    }
+  });
+
+  ipcMain.handle("debts:getPayments", async (_event, args: { debtId: number; page?: number; pageSize?: number }) => {
+    try {
+      return ok(listDebtPaymentsService(args.debtId, { page: args.page, pageSize: args.pageSize }));
     } catch (error) {
       if (error instanceof Error) return fail("VALIDATION_ERROR", error.message);
       return toUnknownError(error);

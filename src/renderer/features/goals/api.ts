@@ -31,6 +31,24 @@ export async function listGoalContributions(goalId: number) {
   return res.data;
 }
 
+export async function getGoalById(id: number, params?: { year?: number; month?: number }) {
+  const res = await electronApi.goals.getById(id, params);
+  if (!res.ok) throw new Error(res.error.message);
+  return res.data;
+}
+
+export async function getGoalProgress(id: number, params?: { year?: number; month?: number }) {
+  const res = await electronApi.goals.getProgress(id, params);
+  if (!res.ok) throw new Error(res.error.message);
+  return res.data;
+}
+
+export async function getGoalContributions(goalId: number, params?: { page?: number; pageSize?: number }) {
+  const res = await electronApi.goals.getContributions(goalId, params);
+  if (!res.ok) throw new Error(res.error.message);
+  return res.data;
+}
+
 export async function addGoalContribution(goalId: number, payload: AddGoalContributionInput) {
   const res = await electronApi.goals.addContribution(goalId, payload);
   if (!res.ok) throw new Error(res.error.message);

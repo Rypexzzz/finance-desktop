@@ -33,6 +33,13 @@ export type DebtPayment = {
   createdAt: string;
 };
 
+export type DebtProgress = {
+  progressTotal: number;
+  progressMonth: number | null;
+  paidMonthRub: number;
+  currentBalanceRub: number;
+};
+
 export type CreateDebtInput = {
   debtType: DebtType;
   name: string;
