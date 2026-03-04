@@ -20,6 +20,24 @@ export function listGoalsService(params?: { year?: number; month?: number }) {
   return listGoals(params?.year ?? now.getFullYear(), params?.month ?? now.getMonth() + 1);
 }
 
+export function getGoalByIdService(goalId: number, params?: { year?: number; month?: number }) {
+  if (!Number.isInteger(goalId) || goalId <= 0) throw new Error("Некорректный ID цели");
+  const now = new Date();
+  const goal = listGoals(params?.year ?? now.getFullYear(), params?.month ?? now.getMonth() + 1).find((item) => item.id === goalId);
+  if (!goal) throw new Error("Цель не найдена");
+  return goal;
+}
+
+export function getGoalProgressService(goalId: number, params?: { year?: number; month?: number }) {
+  const goal = getGoalByIdService(goalId, params);
+  return {
+    progressTotal: goal.progressTotal,
+    progressMonth: goal.progressMonth,
+    currentAmountRub: goal.currentAmountRub,
+    monthContributionsRub: goal.monthContributionsRub
+  };
+}
+
 export function createGoalService(payload: CreateGoalInput) {
   if (!payload.name?.trim()) throw new Error("Название цели обязательно");
   if (!Number.isInteger(payload.targetAmountRub) || payload.targetAmountRub <= 0) throw new Error("Целевая сумма должна быть > 0");
@@ -44,9 +62,9 @@ export function changeGoalStatusService(id: number, status: GoalStatus) {
   return { id: updated };
 }
 
-export function listGoalContributionsService(goalId: number) {
+export function listGoalContributionsService(goalId: number, params?: { page?: number; pageSize?: number }) {
   if (!Number.isInteger(goalId) || goalId <= 0) throw new Error("Некорректный ID цели");
-  return listGoalContributions(goalId);
+  return listGoalContributions(goalId, params?.page ?? 1, params?.pageSize ?? 20);
 }
 
 export function addGoalContributionService(goalId: number, payload: AddGoalContributionInput) {

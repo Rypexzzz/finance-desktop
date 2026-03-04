@@ -5,6 +5,7 @@ import type { Category } from "../../../../shared/types/category";
 import type { TransactionListItem } from "../../../../shared/types/transaction";
 import { getTodayIsoDate } from "../../../lib/formatters";
 import { getCategoryEmoji } from "../../../components/CategoryIcon";
+import { IconSelect } from "../../../components/IconSelect";
 import { transactionFormSchema, type TransactionFormValues } from "../schemas";
 
 type Props = {
@@ -126,13 +127,13 @@ export function TransactionFormDialog({
 
             <label>
               Категория
-              <select {...form.register("categoryId")}>
-                {availableCategories.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {getCategoryEmoji(c.iconName)} {c.nameRu}
-                  </option>
-                ))}
-              </select>
+              <input type="hidden" {...form.register("categoryId")} />
+              <IconSelect
+                value={String(form.watch("categoryId") ?? "")}
+                onChange={(next) => form.setValue("categoryId", Number(next), { shouldValidate: true })}
+                options={availableCategories.map((c) => ({ value: String(c.id), label: c.nameRu, icon: getCategoryEmoji(c.iconName) }))}
+                placeholder="Выберите категорию"
+              />
               {form.formState.errors.categoryId && (
                 <span className="field-error">{form.formState.errors.categoryId.message}</span>
               )}

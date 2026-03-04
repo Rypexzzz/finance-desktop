@@ -13,7 +13,6 @@ export function AppRouter() {
         <Routes>
           <Route path="/" element={<Navigate to="/analytics" replace />} />
           <Route path="/transactions" element={<TransactionsPage />} />
-          <Route path="/dashboard" element={<Navigate to="/analytics" replace />} />
           <Route path="/analytics" element={<AnalyticsPage />} />
           <Route path="/goals" element={<GoalsPage />} />
           <Route path="/debts" element={<DebtsPage />} />

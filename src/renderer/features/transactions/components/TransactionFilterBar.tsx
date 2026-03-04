@@ -1,6 +1,7 @@
 import type { Category } from "../../../../shared/types/category";
 import type { TransactionListFilters } from "../../../../shared/types/transaction";
 import { getCategoryEmoji } from "../../../components/CategoryIcon";
+import { IconSelect } from "../../../components/IconSelect";
 
 type Props = {
   filters: TransactionListFilters;
@@ -148,23 +149,20 @@ export function TransactionFilterBar({ filters, onChange, categories }: Props) {
 
         <label>
           Категория
-          <select
-            value={filters.categoryId ?? ""}
-            onChange={(e) =>
+          <IconSelect
+            value={String(filters.categoryId ?? "")}
+            onChange={(next) =>
               onChange({
                 ...filters,
-                categoryId: e.target.value ? Number(e.target.value) : undefined,
+                categoryId: next ? Number(next) : undefined,
                 page: 1
               })
             }
-          >
-            <option value="">Все категории</option>
-            {categories.map((c) => (
-              <option key={c.id} value={c.id}>
-                {getCategoryEmoji(c.iconName)} {c.nameRu}
-              </option>
-            ))}
-          </select>
+            options={[
+              { value: "", label: "Все категории", icon: "📁" },
+              ...categories.map((c) => ({ value: String(c.id), label: c.nameRu, icon: getCategoryEmoji(c.iconName) }))
+            ]}
+          />
         </label>
 
         <label className="filters-search-modern">

@@ -85,10 +85,15 @@ export function getDebtById(id: number) {
   return db.prepare("SELECT * FROM debts WHERE id = ?").get(id) as any;
 }
 
-export function listDebtPayments(debtId: number): DebtPayment[] {
+export function listDebtPayments(debtId: number, page = 1, pageSize = 20): { items: DebtPayment[]; total: number } {
   const db = getDb();
-  const rows = db.prepare(`SELECT * FROM debt_payments WHERE debt_id = ? ORDER BY date DESC, id DESC`).all(debtId) as Array<any>;
-  return rows.map((row) => ({
+  const limit = Math.max(1, Math.min(pageSize, 200));
+  const offset = Math.max(0, (page - 1) * limit);
+  const totalRow = db.prepare(`SELECT COUNT(*) as total FROM debt_payments WHERE debt_id = ?`).get(debtId) as { total: number };
+  const rows = db.prepare(`SELECT * FROM debt_payments WHERE debt_id = ? ORDER BY date DESC, id DESC LIMIT ? OFFSET ?`).all(debtId, limit, offset) as Array<any>;
+  return {
+    total: totalRow?.total ?? 0,
+    items: rows.map((row) => ({
     id: row.id,
     debtId: row.debt_id,
     transactionId: row.transaction_id,
@@ -98,7 +103,8 @@ export function listDebtPayments(debtId: number): DebtPayment[] {
     balanceAfterRub: row.balance_after_rub,
     comment: row.comment ?? "",
     createdAt: row.created_at
-  }));
+  }))
+  };
 }
 
 

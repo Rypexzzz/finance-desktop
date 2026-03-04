@@ -30,6 +30,13 @@ export type GoalContribution = {
   createdAt: string;
 };
 
+export type GoalProgress = {
+  progressTotal: number;
+  progressMonth: number | null;
+  currentAmountRub: number;
+  monthContributionsRub: number;
+};
+
 export type CreateGoalInput = {
   name: string;
   targetAmountRub: number;

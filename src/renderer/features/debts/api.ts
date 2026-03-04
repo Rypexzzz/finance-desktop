@@ -31,6 +31,24 @@ export async function listDebtPayments(debtId: number) {
   return res.data;
 }
 
+export async function getDebtById(id: number, params?: { year?: number; month?: number }) {
+  const res = await electronApi.debts.getById(id, params);
+  if (!res.ok) throw new Error(res.error.message);
+  return res.data;
+}
+
+export async function getDebtProgress(id: number, params?: { year?: number; month?: number }) {
+  const res = await electronApi.debts.getProgress(id, params);
+  if (!res.ok) throw new Error(res.error.message);
+  return res.data;
+}
+
+export async function getDebtPayments(debtId: number, params?: { page?: number; pageSize?: number }) {
+  const res = await electronApi.debts.getPayments(debtId, params);
+  if (!res.ok) throw new Error(res.error.message);
+  return res.data;
+}
+
 export async function addDebtPayment(debtId: number, payload: AddDebtPaymentInput) {
   const res = await electronApi.debts.addPayment(debtId, payload);
   if (!res.ok) throw new Error(res.error.message);

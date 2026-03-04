@@ -1,6 +1,13 @@
 import { useMemo, useState } from "react";
 import { useTransactions } from "../features/transactions/hooks";
 import { useCategories } from "../features/categories/hooks";
+import {
+  useCategoryBreakdown,
+  useMonthComparison,
+  useMonthOverview,
+  useMonthlyTrend,
+  useYearOverview
+} from "../features/analytics/hooks";
 import { formatDateRu, formatRub } from "../lib/formatters";
 
 const MONTHS_RU = ["Янв", "Фев", "Мар", "Апр", "Май", "Июн", "Июл", "Авг", "Сен", "Окт", "Ноя", "Дек"];
@@ -17,37 +24,30 @@ export function AnalyticsPage() {
   const yearOptions = Array.from({ length: 8 }, (_, i) => now.getFullYear() - i);
   const transactionsQuery = useTransactions({ periodType, year, month: periodType === "month" ? month : undefined, type, categoryId, page: 1, pageSize: 600 });
   const recentQuery = useTransactions({ periodType, year, month: periodType === "month" ? month : undefined, type: "all", sortBy: "date", sortDir: "desc", page: 1, pageSize: 6 });
-  const yearQuery = useTransactions({ periodType: "year", year, type: "all", page: 1, pageSize: 1200 });
   const categoriesQuery = useCategories();
 
-  const metrics = useMemo(() => {
-    const items = transactionsQuery.data?.items ?? [];
-    const expenses = items.filter((item) => item.type === "expense");
-    const income = items.filter((item) => item.type === "income").reduce((acc, item) => acc + item.amountRub, 0);
-    const expense = expenses.reduce((acc, item) => acc + item.amountRub, 0);
-    const service = items.filter((item) => item.type === "service").reduce((acc, item) => acc + item.amountRub, 0);
-    const net = income - expense;
-    const averageExpense = Math.round(expense / Math.max(periodType === "month" ? new Date(year, month, 0).getDate() : 12, 1));
+  const monthOverviewQuery = useMonthOverview({ year, month, type, categoryId });
+  const yearOverviewQuery = useYearOverview({ year, type, categoryId });
+  const breakdownQuery = useCategoryBreakdown({ year, month: periodType === "month" ? month : undefined, type, categoryId });
+  const trendQuery = useMonthlyTrend(year);
+  const comparisonQuery = useMonthComparison(year, month);
 
-    const byCategory = new Map<string, number>();
-    for (const item of expenses) {
-      byCategory.set(item.categoryNameRu, (byCategory.get(item.categoryNameRu) ?? 0) + item.amountRub);
-    }
-    const topCategories = Array.from(byCategory.entries()).sort((a, b) => b[1] - a[1]).slice(0, 5);
+  const overview = periodType === "month" ? monthOverviewQuery.data : yearOverviewQuery.data;
 
-    return { income, expense, net, service, averageExpense, topCategories };
-  }, [transactionsQuery.data?.items, periodType, year, month]);
+  const metrics = {
+    income: overview?.incomeRub ?? 0,
+    expense: overview?.expenseRub ?? 0,
+    net: overview?.netRub ?? 0,
+    averageExpense: overview?.averageExpenseRub ?? 0
+  };
 
   const breakdown = useMemo(() => {
-    const map = new Map<string, number>();
-    for (const item of transactionsQuery.data?.items ?? []) {
-      if (item.type !== "expense") continue;
-      map.set(item.categoryNameRu, (map.get(item.categoryNameRu) ?? 0) + item.amountRub);
-    }
-    const sorted = Array.from(map.entries()).sort((a, b) => b[1] - a[1]).map(([label, amount], index) => ({ label, amount, color: BREAKDOWN_COLORS[index] ?? BREAKDOWN_COLORS[5] }));
+    const sorted = (breakdownQuery.data ?? [])
+      .map((item, index) => ({ label: item.categoryNameRu, amount: item.amountRub, color: BREAKDOWN_COLORS[index] ?? BREAKDOWN_COLORS[5] }));
+
     if (sorted.length <= 5) return sorted;
     return [...sorted.slice(0, 4), { label: "Остальные", amount: sorted.slice(4).reduce((acc, item) => acc + item.amount, 0), color: BREAKDOWN_COLORS[5] }];
-  }, [transactionsQuery.data?.items]);
+  }, [breakdownQuery.data]);
 
   const donutBackground = useMemo(() => {
     const total = breakdown.reduce((acc, item) => acc + item.amount, 0);
@@ -64,25 +64,31 @@ export function AnalyticsPage() {
   }, [breakdown]);
 
   const trend = useMemo(() => {
-    const months = Array.from({ length: 12 }, (_, index) => ({ month: index + 1, income: 0, expense: 0 }));
-    for (const item of yearQuery.data?.items ?? []) {
-      if (item.type === "service") continue;
-      const m = Number(item.date.slice(5, 7));
-      const bucket = months[m - 1];
-      if (!bucket) continue;
-      if (item.type === "income") bucket.income += item.amountRub;
-      if (item.type === "expense") bucket.expense += item.amountRub;
-    }
-    const max = Math.max(...months.map((item) => Math.max(item.income, item.expense)), 1);
-    return { months, max };
-  }, [yearQuery.data?.items]);
+    const months = (trendQuery.data ?? []).map((item) => ({ month: item.month, income: item.incomeRub, expense: item.expenseRub }));
+    const fallback = Array.from({ length: 12 }, (_, index) => ({ month: index + 1, income: 0, expense: 0 }));
+    const list = months.length ? months : fallback;
+    const max = Math.max(...list.map((item) => Math.max(item.income, item.expense)), 1);
+    return { months: list, max };
+  }, [trendQuery.data]);
 
   const comparison = useMemo(() => {
-    const current = trend.months[month - 1] ?? { income: 0, expense: 0 };
-    const prevIndex = month === 1 ? 11 : month - 2;
-    const previous = trend.months[prevIndex] ?? { income: 0, expense: 0 };
-    return { current, previous };
-  }, [trend.months, month]);
+    if (comparisonQuery.data) {
+      return {
+        current: { income: comparisonQuery.data.current.incomeRub, expense: comparisonQuery.data.current.expenseRub },
+        previous: { income: comparisonQuery.data.previous.incomeRub, expense: comparisonQuery.data.previous.expenseRub }
+      };
+    }
+    return { current: { income: 0, expense: 0 }, previous: { income: 0, expense: 0 } };
+  }, [comparisonQuery.data]);
+
+  const hasError =
+    transactionsQuery.isError ||
+    recentQuery.isError ||
+    monthOverviewQuery.isError ||
+    yearOverviewQuery.isError ||
+    breakdownQuery.isError ||
+    trendQuery.isError ||
+    comparisonQuery.isError;
 
   return (
     <div className="page-stack">
@@ -90,6 +96,8 @@ export function AnalyticsPage() {
         <h1>Аналитика</h1>
         <p className="muted">Единый раздел со сводкой, трендами, структурой расходов и историей операций.</p>
       </div>
+
+      {hasError && <div className="alert error">Ошибка загрузки аналитики.</div>}
 
       <div className="card analytics-filters-grid">
         <label>Период<select value={periodType} onChange={(e) => setPeriodType(e.target.value as "month" | "year")}><option value="month">Месяц</option><option value="year">Год</option></select></label>

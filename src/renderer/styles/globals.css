@@ -214,6 +214,52 @@ input, select {
   padding: 10px 12px;
 }
 
+.icon-select {
+  position: relative;
+}
+
+.icon-select-trigger {
+  width: 100%;
+  border: 1px solid var(--border);
+  background: var(--surface-elevated);
+  color: var(--text);
+  border-radius: 10px;
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.icon-select-list {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  z-index: 20;
+  background: var(--surface-elevated);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  max-height: 240px;
+  overflow: auto;
+  box-shadow: var(--shadow);
+}
+
+.icon-select-item {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  text-align: left;
+  display: flex;
+  gap: 8px;
+  padding: 10px 12px;
+}
+
+.icon-select-item:hover,
+.icon-select-item.active {
+  background: var(--hover);
+}
+
 .table-header {
   display: flex;
   align-items: center;
