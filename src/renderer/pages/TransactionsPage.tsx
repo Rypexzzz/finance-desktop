@@ -285,7 +285,7 @@ export function TransactionsPage() {
           <div className="stat-label">Служебные</div>
           <div className="stat-value">{formatRub(summary.service)}</div>
           <div className="stat-sub muted">
-            Не входят в базовую аналитику (позже)
+            Не входят в базовую аналитику
           </div>
         </div>
       </div>

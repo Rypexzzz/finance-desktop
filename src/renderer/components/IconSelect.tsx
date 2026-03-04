@@ -85,7 +85,9 @@ export function IconSelect({ options, value, onChange, placeholder = "Выбер
               onMouseDown={(e) => {
                 e.preventDefault();
               }}
-              onClick={() => {
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
                 onChange(item.value);
                 setOpen(false);
               }}
@@ -112,6 +114,7 @@ export function IconSelect({ options, value, onChange, placeholder = "Выбер
                 }
                 if (e.key === "Enter" || e.key === " ") {
                   e.preventDefault();
+                  e.stopPropagation();
                   onChange(item.value);
                   setOpen(false);
                 }
