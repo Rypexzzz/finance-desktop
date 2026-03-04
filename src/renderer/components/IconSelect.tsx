@@ -39,6 +39,10 @@ export function IconSelect({ options, value, onChange, placeholder = "Выбер
     current?.focus();
   }, [open, selectedIndex]);
 
+  useEffect(() => {
+    setOpen(false);
+  }, [value]);
+
   const moveFocus = (nextIndex: number) => {
     const bounded = Math.max(0, Math.min(options.length - 1, nextIndex));
     listRef.current?.querySelector<HTMLButtonElement>(`[data-index='${bounded}']`)?.focus();

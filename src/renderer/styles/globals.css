@@ -236,6 +236,17 @@ input, select {
   padding: 10px 12px;
 }
 
+input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
 .icon-select {
   position: relative;
 }
@@ -323,6 +334,16 @@ input, select {
 .row-actions {
   display: inline-flex;
   gap: 6px;
+}
+
+.icon-action-btn {
+  width: 34px;
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  font-size: 16px;
 }
 
 .badge {
