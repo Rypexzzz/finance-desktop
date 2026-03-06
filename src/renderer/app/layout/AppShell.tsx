@@ -4,16 +4,34 @@ import { useState } from "react";
 import { SettingsPanel } from "../../features/settings/components/SettingsPanel";
 
 const navItems = [
-  { to: "/transactions", label: "Операции" },
-  { to: "/analytics", label: "Аналитика" },
-  { to: "/goals", label: "Цели" },
-  { to: "/debts", label: "Долги" }
+  { to: "/transactions", label: "Операции", icon: "💳" },
+  { to: "/analytics", label: "Аналитика", icon: "📊" },
+  { to: "/goals", label: "Цели", icon: "🎯" },
+  { to: "/debts", label: "Долги", icon: "🏦" }
 ];
+
+const PAGE_SUBTITLES: Record<string, string> = {
+  "/transactions": "Управление доходами и расходами",
+  "/analytics": "Тренды, сводка и структура расходов",
+  "/goals": "Накопления и финансовые цели",
+  "/debts": "Кредиты и погашения"
+};
+
+function formatCurrentDate(): string {
+  const now = new Date();
+  return now.toLocaleDateString("ru-RU", {
+    weekday: "short",
+    day: "numeric",
+    month: "long"
+  });
+}
 
 export function AppShell({ children }: PropsWithChildren) {
   const location = useLocation();
   const [collapsed, setCollapsed] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+
+  const currentNav = navItems.find((i) => i.to === location.pathname);
 
   return (
     <div className={`app-shell ${collapsed ? "collapsed" : ""}`}>
@@ -21,6 +39,12 @@ export function AppShell({ children }: PropsWithChildren) {
         <button className="btn ghost sidebar-toggle" onClick={() => setCollapsed((prev) => !prev)}>
           {collapsed ? "→" : "←"}
         </button>
+        {!collapsed && (
+          <div className="brand">
+            <span style={{ fontSize: 20 }}>💰</span>
+            Finance Desktop
+          </div>
+        )}
         <nav className="nav">
           {navItems.map((item) => (
             <NavLink
@@ -29,7 +53,8 @@ export function AppShell({ children }: PropsWithChildren) {
               className={({ isActive }) => `nav-item ${isActive ? "active" : ""}`}
               title={item.label}
             >
-              {collapsed ? item.label[0] : item.label}
+              <span className="nav-icon">{item.icon}</span>
+              <span className="nav-label">{item.label}</span>
             </NavLink>
           ))}
         </nav>
@@ -37,12 +62,20 @@ export function AppShell({ children }: PropsWithChildren) {
 
       <div className="main-layout">
         <header className="topbar">
-          <div className="topbar-title">
-            {navItems.find((i) => i.to === location.pathname)?.label ?? "Приложение"}
+          <div className="topbar-left">
+            <div className="topbar-title">
+              {currentNav?.label ?? "Приложение"}
+            </div>
+            <div className="topbar-subtitle">
+              {PAGE_SUBTITLES[location.pathname] ?? ""}
+            </div>
           </div>
-          <button className="btn ghost settings-trigger" onClick={() => setIsSettingsOpen(true)} title="Настройки" aria-label="Открыть настройки">
-            ⚙️
-          </button>
+          <div className="topbar-right">
+            <span className="topbar-date">{formatCurrentDate()}</span>
+            <button className="btn ghost settings-trigger" onClick={() => setIsSettingsOpen(true)} title="Настройки" aria-label="Открыть настройки">
+              ⚙️
+            </button>
+          </div>
         </header>
 
         <main className="content">{children}</main>
