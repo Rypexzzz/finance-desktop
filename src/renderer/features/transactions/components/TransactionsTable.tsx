@@ -13,8 +13,11 @@ export function TransactionsTable({ items, total, onEdit, onDelete }: Props) {
   if (!items.length) {
     return (
       <div className="card">
-        <h3>Операции</h3>
-        <p className="muted">Пока нет операций за выбранный период.</p>
+        <div className="empty-state">
+          <div className="empty-state-icon">📋</div>
+          <h3 className="empty-state-title">Нет операций</h3>
+          <p className="empty-state-desc">Пока нет операций за выбранный период. Создайте первую операцию, чтобы начать учёт.</p>
+        </div>
       </div>
     );
   }

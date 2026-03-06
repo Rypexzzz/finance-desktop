@@ -235,8 +235,8 @@ export function TransactionsPage() {
             onClick={() => setIsFiltersVisible((prev) => !prev)}
             aria-expanded={isFiltersVisible}
           >
-            <span className="filters-toggle-btn-icon" aria-hidden="true">
-              {isFiltersVisible ? "▴" : "▾"}
+            <span className="filters-toggle-btn-icon" aria-hidden="true" style={{ transform: isFiltersVisible ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s ease" }}>
+              ▾
             </span>
             {isFiltersVisible ? "Скрыть фильтры" : "Показать фильтры"}
           </button>
@@ -291,8 +291,12 @@ export function TransactionsPage() {
       </div>
 
       {txQuery.isLoading || categoriesQuery.isLoading ? (
-        <div className="card">
-          <p>Загрузка...</p>
+        <div className="card skeleton">
+          <div className="skeleton-row" />
+          <div className="skeleton-row" />
+          <div className="skeleton-row" />
+          <div className="skeleton-row" />
+          <div className="skeleton-row" />
         </div>
       ) : txQuery.isError ? (
         <div className="card">

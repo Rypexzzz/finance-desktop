@@ -147,27 +147,48 @@ export function GoalsPage() {
       </div>
 
       <div className="goals-grid">
+        {(goalsQuery.data ?? []).length === 0 && (
+          <div className="card" style={{ gridColumn: "1 / -1" }}>
+            <div className="empty-state">
+              <div className="empty-state-icon">🎯</div>
+              <h3 className="empty-state-title">Нет целей</h3>
+              <p className="empty-state-desc">Создайте первую цель накоплений, чтобы начать отслеживать прогресс.</p>
+            </div>
+          </div>
+        )}
         {(goalsQuery.data ?? []).map((goal) => {
           const totalPercent = Math.max(0, Math.min(100, Math.round(goal.progressTotal * 100)));
           const monthPercent = goal.progressMonth === null ? null : Math.max(0, Math.min(100, Math.round(goal.progressMonth * 100)));
+          const isSelected = selectedGoalId === goal.id;
           return (
-            <div className="card" key={goal.id}>
-              <div className="goal-title-row">
-                <strong>{goal.name}</strong>
-                <select value={goal.status} onChange={(e) => onChangeStatus(goal.id, e.target.value as GoalStatus)}>
+            <div className={`card goal-card ${isSelected ? "selected" : ""}`} key={goal.id}>
+              <div className="goal-card-header">
+                <div className="goal-card-title">
+                  <span className={`status-dot ${goal.status}`} />
+                  {goal.name}
+                </div>
+                <select value={goal.status} onChange={(e) => onChangeStatus(goal.id, e.target.value as GoalStatus)} style={{ maxWidth: 140 }}>
                   <option value="active">{GOAL_STATUS_LABELS.active}</option><option value="paused">{GOAL_STATUS_LABELS.paused}</option><option value="completed">{GOAL_STATUS_LABELS.completed}</option><option value="cancelled">{GOAL_STATUS_LABELS.cancelled}</option>
                 </select>
               </div>
-              <p className="muted">{formatRub(goal.currentAmountRub)} из {formatRub(goal.targetAmountRub)} {goal.deadlineDate ? `• до ${formatDateRu(goal.deadlineDate)}` : ""}</p>
+              <div className="goal-card-amounts">
+                <span className="goal-card-current">{formatRub(goal.currentAmountRub)}</span>
+                <span className="goal-card-target">из {formatRub(goal.targetAmountRub)}</span>
+              </div>
+              {goal.deadlineDate && <div className="muted" style={{ fontSize: 12, marginBottom: 4 }}>До {formatDateRu(goal.deadlineDate)}</div>}
               {monthPercent !== null && (
                 <>
                   <div className="progress-bar"><div className="progress-fill" style={{ width: `${monthPercent}%` }} /></div>
-                  <div className="muted">Прогресс за месяц: {monthPercent}%</div>
+                  <div className="muted" style={{ fontSize: 12 }}>Прогресс за месяц: <strong>{monthPercent}%</strong></div>
                 </>
               )}
               <div className="progress-bar"><div className="progress-fill" style={{ width: `${totalPercent}%` }} /></div>
-              <div className="goal-title-row"><span>Общий прогресс: {totalPercent}%</span><button className="btn" onClick={() => { setSelectedGoalId(goal.id); setEditName(goal.name); setEditPlan(goal.monthlyPlanRub ?? 0); }}>Выбрать</button></div>
-              <div className="muted">За месяц: {goal.monthlyPlanRub ? `${monthPercent}% от плана` : formatRub(goal.monthContributionsRub)}</div>
+              <div className="goal-card-footer">
+                <span className="goal-card-percent">{totalPercent}%</span>
+                <button className="btn primary" style={{ padding: "7px 14px", fontSize: 13 }} onClick={() => { setSelectedGoalId(goal.id); setEditName(goal.name); setEditPlan(goal.monthlyPlanRub ?? 0); }}>
+                  {isSelected ? "Выбрана" : "Выбрать"}
+                </button>
+              </div>
             </div>
           );
         })}

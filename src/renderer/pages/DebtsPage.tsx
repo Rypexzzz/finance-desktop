@@ -158,27 +158,50 @@ export function DebtsPage() {
       </div>
 
       <div className="goals-grid">
+        {(debtsQuery.data ?? []).length === 0 && (
+          <div className="card" style={{ gridColumn: "1 / -1" }}>
+            <div className="empty-state">
+              <div className="empty-state-icon">🏦</div>
+              <h3 className="empty-state-title">Нет долгов</h3>
+              <p className="empty-state-desc">Добавьте кредит или кредитную карту для отслеживания погашений.</p>
+            </div>
+          </div>
+        )}
         {(debtsQuery.data ?? []).map((debt) => {
           const totalPercent = Math.max(0, Math.min(100, Math.round(debt.progressTotal * 100)));
           const monthPercent = debt.progressMonth === null ? null : Math.max(0, Math.min(100, Math.round(debt.progressMonth * 100)));
+          const isSelected = selectedDebtId === debt.id;
           return (
-            <div className="card" key={debt.id}>
-              <div className="goal-title-row">
-                <strong>{debt.name}</strong>
-                <select value={debt.status} onChange={(e) => onChangeStatus(debt.id, e.target.value as DebtStatus)}>
+            <div className={`card goal-card ${isSelected ? "selected" : ""}`} key={debt.id}>
+              <div className="goal-card-header">
+                <div className="goal-card-title">
+                  <span className={`status-dot ${debt.status}`} />
+                  {debt.name}
+                </div>
+                <select value={debt.status} onChange={(e) => onChangeStatus(debt.id, e.target.value as DebtStatus)} style={{ maxWidth: 140 }}>
                   <option value="active">{DEBT_STATUS_LABELS.active}</option><option value="paused">{DEBT_STATUS_LABELS.paused}</option><option value="closed">{DEBT_STATUS_LABELS.closed}</option><option value="cancelled">{DEBT_STATUS_LABELS.cancelled}</option>
                 </select>
               </div>
-              <p className="muted">Остаток {formatRub(debt.currentBalanceRub)} из {formatRub(debt.initialAmountRub)}</p>
+              <div className="goal-card-amounts">
+                <span className="goal-card-current expense-text">{formatRub(debt.currentBalanceRub)}</span>
+                <span className="goal-card-target">из {formatRub(debt.initialAmountRub)}</span>
+              </div>
               {monthPercent !== null && (
                 <>
                   <div className="progress-bar"><div className="progress-fill" style={{ width: `${monthPercent}%` }} /></div>
-                  <div className="muted">Прогресс за месяц: {monthPercent}%</div>
+                  <div className="muted" style={{ fontSize: 12 }}>Прогресс за месяц: <strong>{monthPercent}%</strong></div>
                 </>
               )}
               <div className="progress-bar"><div className="progress-fill" style={{ width: `${totalPercent}%` }} /></div>
-              <div className="goal-title-row"><span>Общий прогресс: {totalPercent}%</span><div className="row-actions"><button className="btn" onClick={() => { setSelectedDebtId(debt.id); setEditName(debt.name); setEditPlan(debt.monthlyPlanRub ?? 0); }}>Выбрать</button><button className="btn ghost danger" onClick={() => onDeleteDebt(debt.id)}>Удалить долг</button></div></div>
-              <div className="muted">За месяц: {debt.monthlyPlanRub ? `${monthPercent}% от плана` : formatRub(debt.paidMonthRub)}</div>
+              <div className="goal-card-footer">
+                <span className="goal-card-percent">{totalPercent}%</span>
+                <div className="row-actions">
+                  <button className="btn primary" style={{ padding: "7px 14px", fontSize: 13 }} onClick={() => { setSelectedDebtId(debt.id); setEditName(debt.name); setEditPlan(debt.monthlyPlanRub ?? 0); }}>
+                    {isSelected ? "Выбран" : "Выбрать"}
+                  </button>
+                  <button className="btn ghost danger" style={{ padding: "7px 14px", fontSize: 13 }} onClick={() => onDeleteDebt(debt.id)}>Удалить</button>
+                </div>
+              </div>
             </div>
           );
         })}
