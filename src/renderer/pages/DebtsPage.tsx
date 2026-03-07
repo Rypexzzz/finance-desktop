@@ -42,6 +42,7 @@ export function DebtsPage() {
   const [month, setMonth] = useState(now.getMonth() + 1);
   const [selectedDebtId, setSelectedDebtId] = useState<number | undefined>();
 
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [debtType, setDebtType] = useState<DebtType>("loan");
   const [name, setName] = useState("");
   const [initialAmountRub, setInitialAmountRub] = useState(300000);
@@ -86,6 +87,12 @@ export function DebtsPage() {
       targetCloseDate: targetCloseDate || null
     });
     setName("");
+    setInitialAmountRub(300000);
+    setMonthlyPlanRub(0);
+    setMinimumPaymentRub(0);
+    setTargetCloseDate("");
+    setDebtType("loan");
+    setIsCreateOpen(false);
   }
 
   function onTargetCloseDateChange(value: string) {
@@ -134,7 +141,15 @@ export function DebtsPage() {
 
   return (
     <div className="page-stack">
-      <div><h1>Долги</h1><p className="muted">Кредиты и кредитные карты с историей погашений и служебными транзакциями.</p></div>
+      <div className="page-header-row">
+        <div>
+          <h1>Долги</h1>
+          <p className="muted">Кредиты и кредитные карты с историей погашений.</p>
+        </div>
+        <div className="header-actions">
+          <button className="btn expense-btn" onClick={() => setIsCreateOpen(true)}>+ Новый долг</button>
+        </div>
+      </div>
 
       <div className="card analytics-filters-grid">
         <label>Год<input type="number" value={year} onChange={(e) => setYear(Number(e.target.value))} /></label>
@@ -145,16 +160,6 @@ export function DebtsPage() {
         <div className="card stat-card"><div className="stat-label">Всего долгов</div><div className="stat-value">{summary.total}</div></div>
         <div className="card stat-card"><div className="stat-label">Активные</div><div className="stat-value">{summary.active}</div></div>
         <div className="card stat-card"><div className="stat-label">Погашено за месяц</div><div className="stat-value income-text">{formatRub(summary.paidMonth)}</div></div>
-      </div>
-
-      <div className="card analytics-filters-grid">
-        <label>Тип<select value={debtType} onChange={(e) => setDebtType(e.target.value as DebtType)}><option value="loan">Кредит</option><option value="credit_card">Кредитная карта</option></select></label>
-        <label>Название<input value={name} onChange={(e) => setName(e.target.value)} /></label>
-        <label>Начальный долг, ₽<input type="number" value={initialAmountRub} onChange={(e) => setInitialAmountRub(Number(e.target.value))} /></label>
-        <label>План/мес, ₽<input type="number" value={monthlyPlanRub} onChange={(e) => onMonthlyPlanChange(Number(e.target.value))} /></label>
-        <label>Мин. платеж, ₽<input type="number" value={minimumPaymentRub} onChange={(e) => setMinimumPaymentRub(Number(e.target.value))} /></label>
-        <label>Цель закрытия<input type="date" value={targetCloseDate} onChange={(e) => onTargetCloseDateChange(e.target.value)} /></label>
-        <div className="form-actions-inline"><button className="btn primary" onClick={onCreateDebt}>+ Добавить долг</button></div>
       </div>
 
       <div className="goals-grid">
@@ -232,6 +237,28 @@ export function DebtsPage() {
           <div className="table-wrap"><table className="table"><thead><tr><th>Дата</th><th className="align-right">Сумма</th><th className="align-right">До</th><th className="align-right">После</th><th>Комментарий</th></tr></thead><tbody>{(paymentsQuery.data ?? []).map((item) => <tr key={item.id}><td>{formatDateRu(item.date)}</td><td className="align-right">{formatRub(item.amountRub)}</td><td className="align-right">{formatRub(item.balanceBeforeRub)}</td><td className="align-right">{formatRub(item.balanceAfterRub)}</td><td>{item.comment || "—"}</td></tr>)}</tbody></table></div>
         )}
       </div>
+
+      {isCreateOpen && (
+        <div className="modal-overlay" role="dialog" aria-modal="true" aria-label="Новый долг" onClick={() => setIsCreateOpen(false)}>
+          <div className="modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>Новый долг</h3>
+            </div>
+            <div className="form-grid">
+              <label>Тип<select value={debtType} onChange={(e) => setDebtType(e.target.value as DebtType)}><option value="loan">Кредит</option><option value="credit_card">Кредитная карта</option></select></label>
+              <label>Название<input value={name} onChange={(e) => setName(e.target.value)} placeholder="Например: Ипотека" /></label>
+              <label>Сумма долга, ₽<input type="number" value={initialAmountRub} onChange={(e) => setInitialAmountRub(Number(e.target.value))} /></label>
+              <label>Мин. платёж, ₽<input type="number" value={minimumPaymentRub} onChange={(e) => setMinimumPaymentRub(Number(e.target.value))} /></label>
+              <label>План в месяц, ₽<input type="number" value={monthlyPlanRub} onChange={(e) => onMonthlyPlanChange(Number(e.target.value))} /></label>
+              <label>Цель закрытия<input type="date" value={targetCloseDate} onChange={(e) => onTargetCloseDateChange(e.target.value)} /></label>
+            </div>
+            <div className="modal-actions">
+              <button className="btn" onClick={() => setIsCreateOpen(false)}>Отмена</button>
+              <button className="btn primary" onClick={onCreateDebt} disabled={!name.trim()}>Добавить долг</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

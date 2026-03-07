@@ -39,12 +39,6 @@ export function AppShell({ children }: PropsWithChildren) {
         <button className="btn ghost sidebar-toggle" onClick={() => setCollapsed((prev) => !prev)}>
           {collapsed ? "→" : "←"}
         </button>
-        {!collapsed && (
-          <div className="brand">
-            <span style={{ fontSize: 20 }}>💰</span>
-            Finance Desktop
-          </div>
-        )}
         <nav className="nav">
           {navItems.map((item) => (
             <NavLink

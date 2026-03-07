@@ -40,6 +40,7 @@ export function GoalsPage() {
   const [month, setMonth] = useState(now.getMonth() + 1);
   const [selectedGoalId, setSelectedGoalId] = useState<number | undefined>();
 
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [name, setName] = useState("");
   const [targetAmountRub, setTargetAmountRub] = useState(100000);
   const [startAmountRub, setStartAmountRub] = useState(0);
@@ -81,6 +82,11 @@ export function GoalsPage() {
       deadlineDate: deadlineDate || null
     });
     setName("");
+    setTargetAmountRub(100000);
+    setStartAmountRub(0);
+    setMonthlyPlanRub(0);
+    setDeadlineDate("");
+    setIsCreateOpen(false);
   }
 
   async function onAddContribution() {
@@ -109,9 +115,14 @@ export function GoalsPage() {
 
   return (
     <div className="page-stack">
-      <div>
-        <h1>Цели накоплений</h1>
-        <p className="muted">Полноценный учет целей: статус, пополнения, прогресс и история.</p>
+      <div className="page-header-row">
+        <div>
+          <h1>Цели накоплений</h1>
+          <p className="muted">Полноценный учёт целей: статус, пополнения, прогресс и история.</p>
+        </div>
+        <div className="header-actions">
+          <button className="btn income-btn" onClick={() => setIsCreateOpen(true)}>+ Новая цель</button>
+        </div>
       </div>
 
       <div className="card analytics-filters-grid">
@@ -135,15 +146,6 @@ export function GoalsPage() {
         <div className="card stat-card"><div className="stat-label">Всего целей</div><div className="stat-value">{summary.total}</div></div>
         <div className="card stat-card"><div className="stat-label">Выполнено</div><div className="stat-value income-text">{summary.completed}</div></div>
         <div className="card stat-card"><div className="stat-label">Пополнения за месяц</div><div className="stat-value">{formatRub(summary.monthAdded)}</div></div>
-      </div>
-
-      <div className="card analytics-filters-grid">
-        <label>Название<input value={name} onChange={(e) => setName(e.target.value)} /></label>
-        <label>Цель, ₽<input type="number" value={targetAmountRub} onChange={(e) => setTargetAmountRub(Number(e.target.value))} /></label>
-        <label>Старт, ₽<input type="number" value={startAmountRub} onChange={(e) => setStartAmountRub(Number(e.target.value))} /></label>
-        <label>План/мес, ₽<input type="number" value={monthlyPlanRub} onChange={(e) => setMonthlyPlanRub(Number(e.target.value))} /></label>
-        <label>Дедлайн<input type="date" value={deadlineDate} onChange={(e) => setDeadlineDate(e.target.value)} /></label>
-        <div className="form-actions-inline"><button className="btn primary" onClick={onCreateGoal}>+ Создать цель</button></div>
       </div>
 
       <div className="goals-grid">
@@ -219,6 +221,27 @@ export function GoalsPage() {
           <div className="table-wrap"><table className="table"><thead><tr><th>Дата</th><th className="align-right">Сумма</th><th>Комментарий</th></tr></thead><tbody>{(contributionsQuery.data ?? []).map((item) => <tr key={item.id}><td>{formatDateRu(item.date)}</td><td className="align-right">{formatRub(item.amountRub)}</td><td>{item.comment || "—"}</td></tr>)}</tbody></table></div>
         )}
       </div>
+
+      {isCreateOpen && (
+        <div className="modal-overlay" role="dialog" aria-modal="true" aria-label="Новая цель" onClick={() => setIsCreateOpen(false)}>
+          <div className="modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>Новая цель накоплений</h3>
+            </div>
+            <div className="form-grid">
+              <label className="full">Название<input value={name} onChange={(e) => setName(e.target.value)} placeholder="Например: Отпуск" /></label>
+              <label>Целевая сумма, ₽<input type="number" value={targetAmountRub} onChange={(e) => setTargetAmountRub(Number(e.target.value))} /></label>
+              <label>Начальная сумма, ₽<input type="number" value={startAmountRub} onChange={(e) => setStartAmountRub(Number(e.target.value))} /></label>
+              <label>План в месяц, ₽<input type="number" value={monthlyPlanRub} onChange={(e) => setMonthlyPlanRub(Number(e.target.value))} /></label>
+              <label>Дедлайн<input type="date" value={deadlineDate} onChange={(e) => setDeadlineDate(e.target.value)} /></label>
+            </div>
+            <div className="modal-actions">
+              <button className="btn" onClick={() => setIsCreateOpen(false)}>Отмена</button>
+              <button className="btn primary" onClick={onCreateGoal} disabled={!name.trim()}>Создать цель</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
