@@ -10,13 +10,16 @@ import type {
 
 export function listGoals(): GoalWithProgress[] {
   const db = getDb();
+  const now = new Date();
+  const ym = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
   const rows = db.prepare(`
     SELECT
       g.*,
-      COALESCE((SELECT SUM(gc.amount_rub) FROM goal_contributions gc WHERE gc.goal_id = g.id), 0) as contributed_total_rub
+      COALESCE((SELECT SUM(gc.amount_rub) FROM goal_contributions gc WHERE gc.goal_id = g.id), 0) as contributed_total_rub,
+      COALESCE((SELECT SUM(gc.amount_rub) FROM goal_contributions gc WHERE gc.goal_id = g.id AND substr(gc.date, 1, 7) = ?), 0) as month_contributions_rub
     FROM goals g
     ORDER BY g.status ASC, g.created_at DESC
-  `).all() as Array<any>;
+  `).all(ym) as Array<any>;
 
   return rows.map((row) => {
     const current = row.start_amount_rub + row.contributed_total_rub;
@@ -33,7 +36,9 @@ export function listGoals(): GoalWithProgress[] {
       updatedAt: row.updated_at,
       contributedTotalRub: row.contributed_total_rub,
       currentAmountRub: current,
-      progressTotal: (current - row.start_amount_rub) / targetDelta
+      progressTotal: (current - row.start_amount_rub) / targetDelta,
+      monthContributionsRub: row.month_contributions_rub,
+      progressMonth: row.monthly_plan_rub ? row.month_contributions_rub / row.monthly_plan_rub : null
     } as GoalWithProgress;
   });
 }

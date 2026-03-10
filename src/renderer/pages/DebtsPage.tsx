@@ -166,6 +166,7 @@ export function DebtsPage() {
         )}
         {(debtsQuery.data ?? []).map((debt) => {
           const totalPercent = Math.max(0, Math.min(100, Math.round(debt.progressTotal * 100)));
+          const monthPercent = debt.progressMonth === null ? null : Math.max(0, Math.min(100, Math.round(debt.progressMonth * 100)));
           const isSelected = selectedDebtId === debt.id;
           return (
             <div className={`card goal-card ${isSelected ? "selected" : ""}`} key={debt.id}>
@@ -182,6 +183,12 @@ export function DebtsPage() {
                 <span className="goal-card-current expense-text">{formatRub(debt.currentBalanceRub)}</span>
                 <span className="goal-card-target">из {formatRub(debt.initialAmountRub)}</span>
               </div>
+              {monthPercent !== null && (
+                <>
+                  <div className="progress-bar"><div className="progress-fill" style={{ width: `${monthPercent}%` }} /></div>
+                  <div className="muted" style={{ fontSize: 12 }}>Прогресс за месяц: <strong>{monthPercent}%</strong></div>
+                </>
+              )}
               <div className="progress-bar"><div className="progress-fill" style={{ width: `${totalPercent}%` }} /></div>
               <div className="goal-card-footer">
                 <span className="goal-card-percent">{totalPercent}%</span>

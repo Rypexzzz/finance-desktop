@@ -16,6 +16,8 @@ export type GoalWithProgress = Goal & {
   contributedTotalRub: number;
   currentAmountRub: number;
   progressTotal: number;
+  monthContributionsRub: number;
+  progressMonth: number | null;
 };
 
 export type GoalContribution = {

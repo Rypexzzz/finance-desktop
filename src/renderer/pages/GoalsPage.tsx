@@ -51,7 +51,7 @@ export function GoalsPage() {
     return {
       total: goals.length,
       completed: goals.filter((g) => g.status === "completed" || g.progressTotal >= 1).length,
-      totalAdded: goals.reduce((acc, g) => acc + g.contributedTotalRub, 0)
+      monthAdded: goals.reduce((acc, g) => acc + g.monthContributionsRub, 0)
     };
   }, [goalsQuery.data]);
 
@@ -110,7 +110,7 @@ export function GoalsPage() {
       <div className="stats-grid">
         <div className="card stat-card"><div className="stat-label">Всего целей</div><div className="stat-value">{summary.total}</div></div>
         <div className="card stat-card"><div className="stat-label">Выполнено</div><div className="stat-value income-text">{summary.completed}</div></div>
-        <div className="card stat-card"><div className="stat-label">Пополнения</div><div className="stat-value">{formatRub(summary.totalAdded)}</div></div>
+        <div className="card stat-card"><div className="stat-label">Пополнения за месяц</div><div className="stat-value">{formatRub(summary.monthAdded)}</div></div>
       </div>
 
       <div className="goals-grid">
@@ -125,6 +125,7 @@ export function GoalsPage() {
         )}
         {(goalsQuery.data ?? []).map((goal) => {
           const totalPercent = Math.max(0, Math.min(100, Math.round(goal.progressTotal * 100)));
+          const monthPercent = goal.progressMonth === null ? null : Math.max(0, Math.min(100, Math.round(goal.progressMonth * 100)));
           const isSelected = selectedGoalId === goal.id;
           return (
             <div className={`card goal-card ${isSelected ? "selected" : ""}`} key={goal.id}>
@@ -142,6 +143,12 @@ export function GoalsPage() {
                 <span className="goal-card-target">из {formatRub(goal.targetAmountRub)}</span>
               </div>
               {goal.deadlineDate && <div className="muted" style={{ fontSize: 12, marginBottom: 4 }}>До {formatDateRu(goal.deadlineDate)}</div>}
+              {monthPercent !== null && (
+                <>
+                  <div className="progress-bar"><div className="progress-fill" style={{ width: `${monthPercent}%` }} /></div>
+                  <div className="muted" style={{ fontSize: 12 }}>Прогресс за месяц: <strong>{monthPercent}%</strong></div>
+                </>
+              )}
               <div className="progress-bar"><div className="progress-fill" style={{ width: `${totalPercent}%` }} /></div>
               <div className="goal-card-footer">
                 <span className="goal-card-percent">{totalPercent}%</span>

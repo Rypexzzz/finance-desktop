@@ -18,6 +18,8 @@ export type Debt = {
 export type DebtWithProgress = Debt & {
   progressTotal: number;
   paidTotalRub: number;
+  paidMonthRub: number;
+  progressMonth: number | null;
 };
 
 export type DebtPayment = {
