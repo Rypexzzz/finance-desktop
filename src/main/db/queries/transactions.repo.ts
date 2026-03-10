@@ -123,7 +123,7 @@ export function listTransactions(filters: TransactionListFilters): {
   return { items: rows.map(mapRow), total };
 }
 
-export function createTransaction(payload: CreateTransactionInput & { actualType: "expense" | "income" | "service" }) {
+export function createTransaction(payload: Omit<CreateTransactionInput, "type"> & { actualType: "expense" | "income" | "service"; type?: string }) {
   const db = getDb();
   const now = new Date().toISOString();
 

@@ -9,6 +9,7 @@ import {
   useYearOverview
 } from "../features/analytics/hooks";
 import { formatDateRu, formatRub } from "../lib/formatters";
+import { getCategoryEmoji } from "../components/CategoryIcon";
 
 const MONTHS_RU = ["Янв", "Фев", "Мар", "Апр", "Май", "Июн", "Июл", "Авг", "Сен", "Окт", "Ноя", "Дек"];
 const BREAKDOWN_COLORS = ["#3b82f6", "#22c55e", "#f97316", "#a855f7", "#14b8a6", "#6b7280"];
@@ -104,7 +105,7 @@ export function AnalyticsPage() {
         <label>Год<select value={year} onChange={(e) => setYear(Number(e.target.value))}>{yearOptions.map((item) => (<option key={item} value={item}>{item}</option>))}</select></label>
         {periodType === "month" && (<label>Месяц<select value={month} onChange={(e) => setMonth(Number(e.target.value))}>{MONTHS_RU.map((name, index) => <option key={name} value={index + 1}>{name}</option>)}</select></label>)}
         <label>Тип<select value={type} onChange={(e) => setType(e.target.value as typeof type)}><option value="all">Все</option><option value="income">Доходы</option><option value="expense">Расходы</option><option value="service">Служебные</option></select></label>
-        <label>Категория<select value={categoryId ?? ""} onChange={(e) => setCategoryId(e.target.value ? Number(e.target.value) : undefined)}><option value="">Все категории</option>{(categoriesQuery.data ?? []).map((category) => (<option key={category.id} value={category.id}>{category.emoji} {category.nameRu}</option>))}</select></label>
+        <label>Категория<select value={categoryId ?? ""} onChange={(e) => setCategoryId(e.target.value ? Number(e.target.value) : undefined)}><option value="">Все категории</option>{(categoriesQuery.data ?? []).map((category) => (<option key={category.id} value={category.id}>{getCategoryEmoji(category.iconName)} {category.nameRu}</option>))}</select></label>
       </div>
 
       <div className="stats-grid">
