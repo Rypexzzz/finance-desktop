@@ -14,9 +14,9 @@ import {
 import type { AddDebtPaymentInput, CreateDebtInput, DebtStatus, UpdateDebtInput } from "../../shared/types/debt";
 
 export function registerDebtsHandlers() {
-  ipcMain.handle("debts:list", async (_event, params?: { year?: number; month?: number }) => {
+  ipcMain.handle("debts:list", async () => {
     try {
-      return ok(listDebtsService(params));
+      return ok(listDebtsService());
     } catch (error) {
       if (error instanceof Error) return fail("VALIDATION_ERROR", error.message);
       return toUnknownError(error);
@@ -78,18 +78,18 @@ export function registerDebtsHandlers() {
     }
   });
 
-  ipcMain.handle("debts:getById", async (_event, args: { id: number; year?: number; month?: number }) => {
+  ipcMain.handle("debts:getById", async (_event, args: { id: number }) => {
     try {
-      return ok(getDebtByIdService(args.id, { year: args.year, month: args.month }));
+      return ok(getDebtByIdService(args.id));
     } catch (error) {
       if (error instanceof Error) return fail("VALIDATION_ERROR", error.message);
       return toUnknownError(error);
     }
   });
 
-  ipcMain.handle("debts:getProgress", async (_event, args: { id: number; year?: number; month?: number }) => {
+  ipcMain.handle("debts:getProgress", async (_event, args: { id: number }) => {
     try {
-      return ok(getDebtProgressService(args.id, { year: args.year, month: args.month }));
+      return ok(getDebtProgressService(args.id));
     } catch (error) {
       if (error instanceof Error) return fail("VALIDATION_ERROR", error.message);
       return toUnknownError(error);

@@ -15,26 +15,23 @@ function validateIsoDate(date: string) {
   return /^\d{4}-\d{2}-\d{2}$/.test(date);
 }
 
-export function listGoalsService(params?: { year?: number; month?: number }) {
-  const now = new Date();
-  return listGoals(params?.year ?? now.getFullYear(), params?.month ?? now.getMonth() + 1);
+export function listGoalsService() {
+  return listGoals();
 }
 
-export function getGoalByIdService(goalId: number, params?: { year?: number; month?: number }) {
+export function getGoalByIdService(goalId: number) {
   if (!Number.isInteger(goalId) || goalId <= 0) throw new Error("Некорректный ID цели");
-  const now = new Date();
-  const goal = listGoals(params?.year ?? now.getFullYear(), params?.month ?? now.getMonth() + 1).find((item) => item.id === goalId);
+  const goal = listGoals().find((item) => item.id === goalId);
   if (!goal) throw new Error("Цель не найдена");
   return goal;
 }
 
-export function getGoalProgressService(goalId: number, params?: { year?: number; month?: number }) {
-  const goal = getGoalByIdService(goalId, params);
+export function getGoalProgressService(goalId: number) {
+  const goal = getGoalByIdService(goalId);
   return {
     progressTotal: goal.progressTotal,
-    progressMonth: goal.progressMonth,
     currentAmountRub: goal.currentAmountRub,
-    monthContributionsRub: goal.monthContributionsRub
+    contributedTotalRub: goal.contributedTotalRub
   };
 }
 

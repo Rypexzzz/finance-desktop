@@ -12,21 +12,6 @@ import type { GoalStatus } from "../../shared/types/goal";
 
 const TODAY = new Date().toISOString().slice(0, 10);
 
-const MONTHS_RU = [
-  "Январь",
-  "Февраль",
-  "Март",
-  "Апрель",
-  "Май",
-  "Июнь",
-  "Июль",
-  "Август",
-  "Сентябрь",
-  "Октябрь",
-  "Ноябрь",
-  "Декабрь"
-];
-
 const GOAL_STATUS_LABELS: Record<GoalStatus, string> = {
   active: "Активная",
   paused: "На паузе",
@@ -35,9 +20,6 @@ const GOAL_STATUS_LABELS: Record<GoalStatus, string> = {
 };
 
 export function GoalsPage() {
-  const now = new Date();
-  const [year, setYear] = useState(now.getFullYear());
-  const [month, setMonth] = useState(now.getMonth() + 1);
   const [selectedGoalId, setSelectedGoalId] = useState<number | undefined>();
 
   const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -54,7 +36,7 @@ export function GoalsPage() {
   const [editName, setEditName] = useState("");
   const [editPlan, setEditPlan] = useState(0);
 
-  const goalsQuery = useGoals({ year, month });
+  const goalsQuery = useGoals();
   const contributionsQuery = useGoalContributions(selectedGoalId);
 
   const createGoal = useCreateGoal();
@@ -69,7 +51,7 @@ export function GoalsPage() {
     return {
       total: goals.length,
       completed: goals.filter((g) => g.status === "completed" || g.progressTotal >= 1).length,
-      monthAdded: goals.reduce((acc, g) => acc + g.monthContributionsRub, 0)
+      totalAdded: goals.reduce((acc, g) => acc + g.contributedTotalRub, 0)
     };
   }, [goalsQuery.data]);
 
@@ -125,27 +107,10 @@ export function GoalsPage() {
         </div>
       </div>
 
-      <div className="card analytics-filters-grid">
-        <label>
-          Год
-          <input type="number" value={year} onChange={(e) => setYear(Number(e.target.value))} />
-        </label>
-        <label>
-          Месяц
-          <select value={month} onChange={(e) => setMonth(Number(e.target.value))}>
-            {MONTHS_RU.map((monthName, index) => (
-              <option key={monthName} value={index + 1}>
-                {monthName}
-              </option>
-            ))}
-          </select>
-        </label>
-      </div>
-
       <div className="stats-grid">
         <div className="card stat-card"><div className="stat-label">Всего целей</div><div className="stat-value">{summary.total}</div></div>
         <div className="card stat-card"><div className="stat-label">Выполнено</div><div className="stat-value income-text">{summary.completed}</div></div>
-        <div className="card stat-card"><div className="stat-label">Пополнения за месяц</div><div className="stat-value">{formatRub(summary.monthAdded)}</div></div>
+        <div className="card stat-card"><div className="stat-label">Пополнения</div><div className="stat-value">{formatRub(summary.totalAdded)}</div></div>
       </div>
 
       <div className="goals-grid">
@@ -160,7 +125,6 @@ export function GoalsPage() {
         )}
         {(goalsQuery.data ?? []).map((goal) => {
           const totalPercent = Math.max(0, Math.min(100, Math.round(goal.progressTotal * 100)));
-          const monthPercent = goal.progressMonth === null ? null : Math.max(0, Math.min(100, Math.round(goal.progressMonth * 100)));
           const isSelected = selectedGoalId === goal.id;
           return (
             <div className={`card goal-card ${isSelected ? "selected" : ""}`} key={goal.id}>
@@ -178,12 +142,6 @@ export function GoalsPage() {
                 <span className="goal-card-target">из {formatRub(goal.targetAmountRub)}</span>
               </div>
               {goal.deadlineDate && <div className="muted" style={{ fontSize: 12, marginBottom: 4 }}>До {formatDateRu(goal.deadlineDate)}</div>}
-              {monthPercent !== null && (
-                <>
-                  <div className="progress-bar"><div className="progress-fill" style={{ width: `${monthPercent}%` }} /></div>
-                  <div className="muted" style={{ fontSize: 12 }}>Прогресс за месяц: <strong>{monthPercent}%</strong></div>
-                </>
-              )}
               <div className="progress-bar"><div className="progress-fill" style={{ width: `${totalPercent}%` }} /></div>
               <div className="goal-card-footer">
                 <span className="goal-card-percent">{totalPercent}%</span>

@@ -17,8 +17,7 @@ export type Debt = {
 
 export type DebtWithProgress = Debt & {
   progressTotal: number;
-  paidMonthRub: number;
-  progressMonth: number | null;
+  paidTotalRub: number;
 };
 
 export type DebtPayment = {
@@ -35,8 +34,7 @@ export type DebtPayment = {
 
 export type DebtProgress = {
   progressTotal: number;
-  progressMonth: number | null;
-  paidMonthRub: number;
+  paidTotalRub: number;
   currentBalanceRub: number;
 };
 
