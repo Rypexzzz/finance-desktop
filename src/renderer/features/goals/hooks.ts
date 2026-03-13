@@ -2,8 +2,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { AddGoalContributionInput, CreateGoalInput, GoalStatus, UpdateGoalInput } from "../../../shared/types/goal";
 import { addGoalContribution, changeGoalStatus, createGoal, listGoalContributions, listGoals, updateGoal } from "./api";
 
-export function useGoals(params?: { year?: number; month?: number }) {
-  return useQuery({ queryKey: ["goals", params], queryFn: () => listGoals(params?.year, params?.month) });
+export function useGoals() {
+  return useQuery({ queryKey: ["goals"], queryFn: () => listGoals() });
 }
 
 export function useGoalContributions(goalId?: number) {

@@ -16,25 +16,22 @@ function validateIsoDate(date: string) {
   return /^\d{4}-\d{2}-\d{2}$/.test(date);
 }
 
-export function listDebtsService(params?: { year?: number; month?: number }) {
-  const now = new Date();
-  return listDebts(params?.year ?? now.getFullYear(), params?.month ?? now.getMonth() + 1);
+export function listDebtsService() {
+  return listDebts();
 }
 
-export function getDebtByIdService(debtId: number, params?: { year?: number; month?: number }) {
+export function getDebtByIdService(debtId: number) {
   if (!Number.isInteger(debtId) || debtId <= 0) throw new Error("Некорректный ID долга");
-  const now = new Date();
-  const debt = listDebts(params?.year ?? now.getFullYear(), params?.month ?? now.getMonth() + 1).find((item) => item.id === debtId);
+  const debt = listDebts().find((item) => item.id === debtId);
   if (!debt) throw new Error("Долг не найден");
   return debt;
 }
 
-export function getDebtProgressService(debtId: number, params?: { year?: number; month?: number }) {
-  const debt = getDebtByIdService(debtId, params);
+export function getDebtProgressService(debtId: number) {
+  const debt = getDebtByIdService(debtId);
   return {
     progressTotal: debt.progressTotal,
-    progressMonth: debt.progressMonth,
-    paidMonthRub: debt.paidMonthRub,
+    paidTotalRub: debt.paidTotalRub,
     currentBalanceRub: debt.currentBalanceRub
   };
 }

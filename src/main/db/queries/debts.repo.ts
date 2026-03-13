@@ -8,12 +8,14 @@ import type {
   UpdateDebtInput
 } from "../../../shared/types/debt";
 
-export function listDebts(year: number, month: number): DebtWithProgress[] {
+export function listDebts(): DebtWithProgress[] {
   const db = getDb();
-  const ym = `${year}-${String(month).padStart(2, "0")}`;
+  const now = new Date();
+  const ym = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
   const rows = db.prepare(`
     SELECT
       d.*,
+      COALESCE((SELECT SUM(dp.amount_rub) FROM debt_payments dp WHERE dp.debt_id = d.id), 0) as paid_total_rub,
       COALESCE((SELECT SUM(dp.amount_rub) FROM debt_payments dp WHERE dp.debt_id = d.id AND substr(dp.date, 1, 7) = ?), 0) as paid_month_rub
     FROM debts d
     ORDER BY d.status ASC, d.created_at DESC
@@ -32,6 +34,7 @@ export function listDebts(year: number, month: number): DebtWithProgress[] {
     createdAt: row.created_at,
     updatedAt: row.updated_at,
     progressTotal: row.initial_amount_rub > 0 ? (row.initial_amount_rub - row.current_balance_rub) / row.initial_amount_rub : 0,
+    paidTotalRub: row.paid_total_rub,
     paidMonthRub: row.paid_month_rub,
     progressMonth: row.monthly_plan_rub ? row.paid_month_rub / row.monthly_plan_rub : null
   }));

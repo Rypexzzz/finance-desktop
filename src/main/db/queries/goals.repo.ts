@@ -8,9 +8,10 @@ import type {
   UpdateGoalInput
 } from "../../../shared/types/goal";
 
-export function listGoals(year: number, month: number): GoalWithProgress[] {
+export function listGoals(): GoalWithProgress[] {
   const db = getDb();
-  const ym = `${year}-${String(month).padStart(2, "0")}`;
+  const now = new Date();
+  const ym = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
   const rows = db.prepare(`
     SELECT
       g.*,

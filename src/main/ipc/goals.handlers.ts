@@ -13,9 +13,9 @@ import {
 import type { AddGoalContributionInput, CreateGoalInput, GoalStatus, UpdateGoalInput } from "../../shared/types/goal";
 
 export function registerGoalsHandlers() {
-  ipcMain.handle("goals:list", async (_event, params?: { year?: number; month?: number }) => {
+  ipcMain.handle("goals:list", async () => {
     try {
-      return ok(listGoalsService(params));
+      return ok(listGoalsService());
     } catch (error) {
       if (error instanceof Error) return fail("VALIDATION_ERROR", error.message);
       return toUnknownError(error);
@@ -58,18 +58,18 @@ export function registerGoalsHandlers() {
     }
   });
 
-  ipcMain.handle("goals:getById", async (_event, args: { id: number; year?: number; month?: number }) => {
+  ipcMain.handle("goals:getById", async (_event, args: { id: number }) => {
     try {
-      return ok(getGoalByIdService(args.id, { year: args.year, month: args.month }));
+      return ok(getGoalByIdService(args.id));
     } catch (error) {
       if (error instanceof Error) return fail("VALIDATION_ERROR", error.message);
       return toUnknownError(error);
     }
   });
 
-  ipcMain.handle("goals:getProgress", async (_event, args: { id: number; year?: number; month?: number }) => {
+  ipcMain.handle("goals:getProgress", async (_event, args: { id: number }) => {
     try {
-      return ok(getGoalProgressService(args.id, { year: args.year, month: args.month }));
+      return ok(getGoalProgressService(args.id));
     } catch (error) {
       if (error instanceof Error) return fail("VALIDATION_ERROR", error.message);
       return toUnknownError(error);

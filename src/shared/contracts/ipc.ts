@@ -49,23 +49,23 @@ export interface ElectronApi {
     delete(id: number): Promise<ApiResult<{ id: number }>>;
   };
   goals: {
-    list(params?: { year?: number; month?: number }): Promise<ApiResult<GoalWithProgress[]>>;
+    list(): Promise<ApiResult<GoalWithProgress[]>>;
     create(payload: CreateGoalInput): Promise<ApiResult<{ id: number }>>;
     update(id: number, payload: UpdateGoalInput): Promise<ApiResult<{ id: number }>>;
     changeStatus(id: number, status: GoalStatus): Promise<ApiResult<{ id: number }>>;
-    getById(id: number, params?: { year?: number; month?: number }): Promise<ApiResult<GoalWithProgress>>;
-    getProgress(id: number, params?: { year?: number; month?: number }): Promise<ApiResult<GoalProgress>>;
+    getById(id: number): Promise<ApiResult<GoalWithProgress>>;
+    getProgress(id: number): Promise<ApiResult<GoalProgress>>;
     contributions(goalId: number): Promise<ApiResult<GoalContribution[]>>;
     getContributions(goalId: number, params?: { page?: number; pageSize?: number }): Promise<ApiResult<{ items: GoalContribution[]; total: number }>>;
     addContribution(goalId: number, payload: AddGoalContributionInput): Promise<ApiResult<{ id: number }>>;
   };
   debts: {
-    list(params?: { year?: number; month?: number }): Promise<ApiResult<DebtWithProgress[]>>;
+    list(): Promise<ApiResult<DebtWithProgress[]>>;
     create(payload: CreateDebtInput): Promise<ApiResult<{ id: number }>>;
     update(id: number, payload: UpdateDebtInput): Promise<ApiResult<{ id: number }>>;
     changeStatus(id: number, status: DebtStatus): Promise<ApiResult<{ id: number }>>;
-    getById(id: number, params?: { year?: number; month?: number }): Promise<ApiResult<DebtWithProgress>>;
-    getProgress(id: number, params?: { year?: number; month?: number }): Promise<ApiResult<DebtProgress>>;
+    getById(id: number): Promise<ApiResult<DebtWithProgress>>;
+    getProgress(id: number): Promise<ApiResult<DebtProgress>>;
     delete(id: number): Promise<ApiResult<{ id: number }>>;
     payments(debtId: number): Promise<ApiResult<DebtPayment[]>>;
     getPayments(debtId: number, params?: { page?: number; pageSize?: number }): Promise<ApiResult<{ items: DebtPayment[]; total: number }>>;

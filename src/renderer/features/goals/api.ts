@@ -1,8 +1,8 @@
 import { electronApi } from "../../lib/electron-api";
 import type { AddGoalContributionInput, CreateGoalInput, GoalStatus, UpdateGoalInput } from "../../../shared/types/goal";
 
-export async function listGoals(year?: number, month?: number) {
-  const res = await electronApi.goals.list({ year, month });
+export async function listGoals() {
+  const res = await electronApi.goals.list();
   if (!res.ok) throw new Error(res.error.message);
   return res.data;
 }
@@ -31,14 +31,14 @@ export async function listGoalContributions(goalId: number) {
   return res.data;
 }
 
-export async function getGoalById(id: number, params?: { year?: number; month?: number }) {
-  const res = await electronApi.goals.getById(id, params);
+export async function getGoalById(id: number) {
+  const res = await electronApi.goals.getById(id);
   if (!res.ok) throw new Error(res.error.message);
   return res.data;
 }
 
-export async function getGoalProgress(id: number, params?: { year?: number; month?: number }) {
-  const res = await electronApi.goals.getProgress(id, params);
+export async function getGoalProgress(id: number) {
+  const res = await electronApi.goals.getProgress(id);
   if (!res.ok) throw new Error(res.error.message);
   return res.data;
 }

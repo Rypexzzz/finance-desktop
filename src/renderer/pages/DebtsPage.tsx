@@ -37,9 +37,6 @@ const DEBT_STATUS_LABELS: Record<DebtStatus, string> = {
 };
 
 export function DebtsPage() {
-  const now = new Date();
-  const [year, setYear] = useState(now.getFullYear());
-  const [month, setMonth] = useState(now.getMonth() + 1);
   const [selectedDebtId, setSelectedDebtId] = useState<number | undefined>();
 
   const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -57,7 +54,7 @@ export function DebtsPage() {
   const [editName, setEditName] = useState("");
   const [editPlan, setEditPlan] = useState(0);
 
-  const debtsQuery = useDebts({ year, month });
+  const debtsQuery = useDebts();
   const paymentsQuery = useDebtPayments(selectedDebtId);
 
   const createDebt = useCreateDebt();
@@ -73,7 +70,7 @@ export function DebtsPage() {
     return {
       total: debts.length,
       active: debts.filter((d) => d.status === "active").length,
-      paidMonth: debts.reduce((acc, d) => acc + d.paidMonthRub, 0)
+      paidTotal: debts.reduce((acc, d) => acc + d.paidTotalRub, 0)
     };
   }, [debtsQuery.data]);
 
@@ -151,15 +148,10 @@ export function DebtsPage() {
         </div>
       </div>
 
-      <div className="card analytics-filters-grid">
-        <label>Год<input type="number" value={year} onChange={(e) => setYear(Number(e.target.value))} /></label>
-        <label>Месяц<input type="number" min={1} max={12} value={month} onChange={(e) => setMonth(Number(e.target.value))} /></label>
-      </div>
-
       <div className="stats-grid">
         <div className="card stat-card"><div className="stat-label">Всего долгов</div><div className="stat-value">{summary.total}</div></div>
         <div className="card stat-card"><div className="stat-label">Активные</div><div className="stat-value">{summary.active}</div></div>
-        <div className="card stat-card"><div className="stat-label">Погашено за месяц</div><div className="stat-value income-text">{formatRub(summary.paidMonth)}</div></div>
+        <div className="card stat-card"><div className="stat-label">Погашено</div><div className="stat-value income-text">{formatRub(summary.paidTotal)}</div></div>
       </div>
 
       <div className="goals-grid">

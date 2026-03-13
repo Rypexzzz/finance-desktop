@@ -1,8 +1,8 @@
 import { electronApi } from "../../lib/electron-api";
 import type { AddDebtPaymentInput, CreateDebtInput, DebtStatus, UpdateDebtInput } from "../../../shared/types/debt";
 
-export async function listDebts(year?: number, month?: number) {
-  const res = await electronApi.debts.list({ year, month });
+export async function listDebts() {
+  const res = await electronApi.debts.list();
   if (!res.ok) throw new Error(res.error.message);
   return res.data;
 }
@@ -31,14 +31,14 @@ export async function listDebtPayments(debtId: number) {
   return res.data;
 }
 
-export async function getDebtById(id: number, params?: { year?: number; month?: number }) {
-  const res = await electronApi.debts.getById(id, params);
+export async function getDebtById(id: number) {
+  const res = await electronApi.debts.getById(id);
   if (!res.ok) throw new Error(res.error.message);
   return res.data;
 }
 
-export async function getDebtProgress(id: number, params?: { year?: number; month?: number }) {
-  const res = await electronApi.debts.getProgress(id, params);
+export async function getDebtProgress(id: number) {
+  const res = await electronApi.debts.getProgress(id);
   if (!res.ok) throw new Error(res.error.message);
   return res.data;
 }
